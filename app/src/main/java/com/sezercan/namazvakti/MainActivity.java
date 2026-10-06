@@ -48,7 +48,8 @@ public class MainActivity extends Activity {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private TextView nextLabel, countdown, dateText, hijriText, sourceText, soundText;
-    private LinearLayout timesBox, warnBox, weekBox;
+    private LinearLayout timesBox, warnBox, weekBox, poemBox;
+    private String poemDay;
     private Spinner ilceSpinner;
     private RadioGroup soundGroup;
     private long nextTime;
@@ -107,6 +108,9 @@ public class MainActivity extends Activity {
         nextLabel = Ui.add(header, Ui.text(this, "", R.style.Text_HeaderLabel), R.dimen.gap_block);
         countdown = Ui.add(header, Ui.text(this, "", R.style.Text_Countdown), R.dimen.item_gap_title);
         Ui.add(root, header, 0);
+
+        // Günün mısrası
+        poemBox = Ui.add(root, Ui.vertical(this), R.dimen.gap_block);
 
         // Konum kartı
         LinearLayout loc = Ui.card(this, R.color.surface, R.dimen.pad_card);
@@ -203,6 +207,8 @@ public class MainActivity extends Activity {
         boolean hasHijri = hijri != null && !hijri.isEmpty();
         hijriText.setText(hasHijri ? hijri : "");
         hijriText.setVisibility(hasHijri ? View.VISIBLE : View.GONE);
+
+        refreshPoem(now);
 
         int days = Diyanet.daysAhead(this, Prefs.ilce(this));
         sourceText.setText(days > 0
@@ -306,6 +312,28 @@ public class MainActivity extends Activity {
         long left = Math.max(0, nextTime - System.currentTimeMillis());
         long s = (left + 999) / 1000;
         countdown.setText(String.format(TR, "%02d:%02d:%02d", s / 3600, (s / 60) % 60, s % 60));
+    }
+
+    // ---- Günün mısrası ----
+
+    private void refreshPoem(Calendar now) {
+        String day = Habits.dayKey(now);
+        if (day.equals(poemDay)) return; // gün değişmedikçe yeniden kurma
+        poemDay = day;
+        Poems.Poem p = Poems.forDay(this, now);
+        poemBox.removeAllViews();
+        LinearLayout card = Ui.card(this, R.color.poem_bg, R.dimen.pad_detail);
+        Ui.add(card, Ui.text(this, "Günün mısrası", R.style.Text_Label), 0);
+        Ui.add(card, Ui.text(this, p.verse, R.style.Text_Verse), R.dimen.item_gap_detail);
+        if (p.original != null) {
+            Ui.add(card, Ui.text(this, p.original, R.style.Text_VerseOriginal), R.dimen.item_gap_steps);
+        }
+        if (p.meaning != null) {
+            Ui.add(card, Ui.text(this, "Günümüz Türkçesiyle: " + p.meaning, R.style.Text_Small), R.dimen.item_gap_steps);
+        }
+        Ui.add(card, Ui.text(this, "— " + p.poet, R.style.Text_Poet), R.dimen.item_gap_detail);
+        Ui.add(card, Ui.text(this, p.info, R.style.Text_Small), R.dimen.item_gap_title);
+        Ui.add(poemBox, card, 0);
     }
 
     // ---- Haftalık takip ----

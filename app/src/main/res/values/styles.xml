@@ -158,6 +158,22 @@
         <item name="android:textSize">@dimen/ts_list_row</item>
     </style>
 
+    <!-- Günün mısrası -->
+    <style name="Text.Verse" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_reading</item>
+        <item name="android:lineSpacingMultiplier">1.5</item>
+        <item name="android:textDirection">firstStrong</item>
+    </style>
+    <style name="Text.VerseOriginal" parent="Text.Small">
+        <item name="android:textStyle">italic</item>
+        <item name="android:lineSpacingMultiplier">1.4</item>
+        <item name="android:textDirection">firstStrong</item>
+    </style>
+    <style name="Text.Poet" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_body</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
     <!-- Arapça (Amiri) -->
     <style name="Text.Arabic" parent="Text">
         <item name="android:fontFamily">@font/amiri_regular</item>

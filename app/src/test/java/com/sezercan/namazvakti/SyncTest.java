@@ -72,6 +72,24 @@ public class SyncTest {
         assertTrue(Sync.friends(c).isEmpty());
     }
 
+    @Test
+    public void everyPoemIsComplete() {
+        Poems.Poem[] all = Poems.all(c);
+        assertTrue(all.length >= 30);
+        java.util.Set<String> seen = new java.util.HashSet<>();
+        for (Poems.Poem p : all) {
+            assertFalse(p.verse.isEmpty());
+            assertFalse(p.poet.isEmpty());
+            assertFalse(p.info.isEmpty());
+            assertTrue("tekrar: " + p.verse, seen.add(p.verse));
+        }
+        // Art arda iki gün farklı mısra.
+        java.util.Calendar d = Times.today();
+        Poems.Poem a = Poems.forDay(c, d);
+        d.add(java.util.Calendar.DAY_OF_MONTH, 1);
+        assertNotSame(a, Poems.forDay(c, d));
+    }
+
     private static String ev(String message) throws Exception {
         JSONObject o = new JSONObject();
         o.put("event", "message");
