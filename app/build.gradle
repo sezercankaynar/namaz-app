@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.sezercan.namazvakti'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.sezercan.namazvakti'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+    }
+
+    signingConfigs {
+        // Kişisel kullanım için sabit anahtar: her yeni sürüm eski sürümün
+        // üzerine (silmeden) kurulabilsin diye depoda tutuluyor.
+        sabit {
+            storeFile file('namaz.keystore')
+            storePassword 'namazvakti'
+            keyAlias 'namaz'
+            keyPassword 'namazvakti'
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.sabit
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.sabit
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
