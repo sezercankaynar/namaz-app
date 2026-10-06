@@ -42,22 +42,9 @@ final class Ui {
         return Math.round(v * c.getResources().getDisplayMetrics().density);
     }
 
-    /** Açık renk durum çubuğu ve kaydırılabilir sayfa kökü kurar. */
+    /** Kaydırılabilir sayfa kökü kurar ve durum çubuğunu açık renge ayarlar. */
     @SuppressWarnings("deprecation")
     static LinearLayout page(Activity a) {
-        a.getWindow().setStatusBarColor(BG);
-        a.getWindow().setNavigationBarColor(BG);
-        if (Build.VERSION.SDK_INT >= 30) {
-            WindowInsetsController ic = a.getWindow().getInsetsController();
-            if (ic != null) {
-                int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-                ic.setSystemBarsAppearance(light, light);
-            }
-        } else {
-            a.getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
-        }
         ScrollView scroll = new ScrollView(a);
         scroll.setBackgroundColor(BG);
         scroll.setFitsSystemWindows(true);
@@ -65,7 +52,23 @@ final class Ui {
         int p = dp(a, 16);
         root.setPadding(p, p, p, p);
         scroll.addView(root);
+        // Önce içerik kurulmalı: pencere süslemesi (decor) setContentView ile oluşur.
         a.setContentView(scroll);
+
+        a.getWindow().setStatusBarColor(BG);
+        a.getWindow().setNavigationBarColor(BG);
+        View decor = a.getWindow().getDecorView();
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController ic = decor.getWindowInsetsController();
+            if (ic != null) {
+                int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+                ic.setSystemBarsAppearance(light, light);
+            }
+        } else {
+            decor.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        }
         return root;
     }
 
