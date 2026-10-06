@@ -56,8 +56,26 @@ public class ScreenshotTest {
         return outer;
     }
 
+    /** Haftalık özet için örnek veri: kendi işaretlerimiz ve bir arkadaştan gelmiş özet. */
+    static void seedWeek() throws Exception {
+        android.content.Context c = org.robolectric.RuntimeEnvironment.getApplication();
+        String[] days = Habits.lastDays();
+        int[][] mine = {{0, 2, 3, 4, 5}, {0, 2, 4, 5}, {2, 3, 4, 5}, {0, 2, 3, 4, 5}, {0, 4, 5}, {0, 2, 3, 4, 5}, {0, 2}};
+        for (int i = 0; i < days.length; i++) for (int p : mine[i]) Habits.set(c, days[i], p, true);
+        Sync.setMyName(c, "Sezer");
+        Sync.pair(c, "K7PQ2X9M");
+        org.json.JSONObject g = new org.json.JSONObject();
+        int[] masks = {61, 61, 53, 61, 45, 61, 5};
+        for (int i = 0; i < days.length; i++) g.put(days[i], masks[i]);
+        org.json.JSONObject snap = new org.json.JSONObject()
+                .put("v", 1).put("id", "arkadas").put("ad", "Ahmet").put("t", System.currentTimeMillis() - 3600_000).put("g", g);
+        Sync.mergeLines(c, java.util.Collections.singletonList(
+                new org.json.JSONObject().put("event", "message").put("message", snap.toString()).toString()));
+    }
+
     @Test
     public void screens() throws Exception {
+        seedWeek();
         save(content(Robolectric.buildActivity(MainActivity.class).setup().get()), "1_ana_ekran");
         save(content(Robolectric.buildActivity(PrayerDetailActivity.class,
                 new Intent().putExtra(PrayerDetailActivity.EXTRA_KEY, "ogle")).setup().get()), "2_ogle_detay");
@@ -87,6 +105,12 @@ public class ScreenshotTest {
         }
 
         MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
+        SmokeTest.clickAll(main.getWindow().getDecorView(), "👥 Kod:");
+        sheetShot(ShadowDialog.getLatestDialog(), "9_eslesme_kodu");
+        Sync.unpair(org.robolectric.RuntimeEnvironment.getApplication());
+        main = Robolectric.buildActivity(MainActivity.class).setup().get();
+        SmokeTest.clickAll(main.getWindow().getDecorView(), "Arkadaşınla eşleş");
+        sheetShot(ShadowDialog.getLatestDialog(), "9b_eslesme");
         SmokeTest.clickAll(main.getWindow().getDecorView(), "Alarm sesi");
         Dialog d = ShadowDialog.getLatestDialog();
         View dv = d.getWindow().getDecorView();
@@ -99,5 +123,20 @@ public class ScreenshotTest {
         try (FileOutputStream out = new FileOutputStream(new File(OUT, "7_alarm_sesi.png"))) {
             s.compress(Bitmap.CompressFormat.PNG, 100, out);
         }
+    }
+
+    static void sheetShot(Dialog d, String name) throws Exception {
+        View dv = d.getWindow().getDecorView();
+        dv.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY));
+        dv.layout(0, 0, 1080, 2400);
+        Bitmap s = Bitmap.createBitmap(1080, 2400, Bitmap.Config.ARGB_8888);
+        s.eraseColor(0xFFFFF9F5);
+        dv.draw(new Canvas(s));
+        OUT.mkdirs();
+        try (FileOutputStream out = new FileOutputStream(new File(OUT, name + ".png"))) {
+            s.compress(Bitmap.CompressFormat.PNG, 100, out);
+        }
+        d.dismiss();
     }
 }

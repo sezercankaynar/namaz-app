@@ -101,5 +101,16 @@
     <dimen name="switch_thumb_inset">3dp</dimen>
     <dimen name="radio_ring_stroke">2dp</dimen>
     <dimen name="spinner_chevron">20dp</dimen>
+
+    <!-- Haftalık takip -->
+    <dimen name="week_dot">10dp</dimen>
+    <dimen name="week_dot_gap">4dp</dimen>
+    <dimen name="week_col_pad_v">8dp</dimen>
+    <dimen name="pill_pad_h">12dp</dimen>
+    <dimen name="pill_inset_v">6dp</dimen>
+    <dimen name="ts_pill">14sp</dimen>
+    <dimen name="ts_code">34sp</dimen>
+    <dimen name="input_height">52dp</dimen>
+    <dimen name="input_pad_h">14dp</dimen>
     <dimen name="spinner_chevron_inset">12dp</dimen>
 </resources>

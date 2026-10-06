@@ -47,6 +47,7 @@ public class SmokeTest {
         MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
         clickAll(main.getWindow().getDecorView(), "Alarm sesi");
         clickAll(main.getWindow().getDecorView(), "Alarmı dene");
+        clickAll(main.getWindow().getDecorView(), "Arkadaşınla eşleş");
     }
 
     /** Metni içeren tıklanabilir görünüme dokunur. */

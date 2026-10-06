@@ -51,4 +51,8 @@
     <color name="card_reading">#D2C2EE</color>
     <color name="card_meaning">#BBD9F2</color>
     <color name="step_circle">#D2C2EE</color>
+
+    <!-- Haftalık takip -->
+    <color name="dot_done">#2B3A67</color>
+    <color name="dot_missed">#CFD3E6</color>
 </resources>

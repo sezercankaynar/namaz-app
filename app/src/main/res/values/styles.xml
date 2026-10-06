@@ -137,6 +137,27 @@
     <style name="Text.NumMedium" parent="Text.NumLarge"><item name="android:textSize">@dimen/ts_num_medium</item></style>
     <style name="Text.NumSmall" parent="Text.NumLarge"><item name="android:textSize">@dimen/ts_num_small</item></style>
 
+    <!-- Haftalık takip -->
+    <style name="Text.Pill" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_pill</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:paddingStart">@dimen/pill_pad_h</item>
+        <item name="android:paddingEnd">@dimen/pill_pad_h</item>
+    </style>
+    <style name="Text.Pill.On"><item name="android:textColor">@color/header_text</item></style>
+    <style name="Text.Code" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_code</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
+    <style name="Text.Input" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_list_row</item>
+    </style>
+
     <!-- Arapça (Amiri) -->
     <style name="Text.Arabic" parent="Text">
         <item name="android:fontFamily">@font/amiri_regular</item>

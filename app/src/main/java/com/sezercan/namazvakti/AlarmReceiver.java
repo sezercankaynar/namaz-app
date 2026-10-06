@@ -21,12 +21,17 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
         AlarmScheduler.scheduleNext(c);
 
-        if (Diyanet.needsRefresh(c)) {
+        // Arka plan işleri: vakitleri güncelle ve (eşleşildiyse) haftalık özeti yeniden gönder,
+        // böylece arkadaşın uygulamayı geç açsa da güncel özeti bulur.
+        final boolean refresh = Diyanet.needsRefresh(c);
+        final boolean share = Sync.paired(c);
+        if (refresh || share) {
             final PendingResult pr = goAsync();
             final Context app = c.getApplicationContext();
             new Thread(() -> {
                 try {
-                    if (Diyanet.refresh(app)) AlarmScheduler.scheduleNext(app);
+                    if (refresh && Diyanet.refresh(app)) AlarmScheduler.scheduleNext(app);
+                    if (share) Sync.publish(app);
                 } finally {
                     pr.finish();
                 }
