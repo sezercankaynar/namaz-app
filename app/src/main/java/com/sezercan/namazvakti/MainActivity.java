@@ -3,7 +3,6 @@ package com.sezercan.namazvakti;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,12 +15,16 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
-import android.view.Gravity;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.TextAppearanceSpan;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -41,10 +44,10 @@ public class MainActivity extends Activity {
     private static final int REQ_SOUND_FILE = 7;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private TextView nextName, countdown, dateText, hijriText, sourceText;
+    private TextView nextLabel, countdown, dateText, hijriText, sourceText, soundText;
     private LinearLayout timesBox, warnBox;
     private Spinner ilceSpinner;
-    private Button soundButton;
+    private RadioGroup soundGroup;
     private long nextTime;
     private int lastMinute = -1;
 
@@ -87,32 +90,24 @@ public class MainActivity extends Activity {
         handler.removeCallbacks(tick);
     }
 
+    // ---- Ekran ----
+
     private void buildUi() {
-        LinearLayout root = Ui.page(this);
+        LinearLayout root = Ui.page(this, null, R.dimen.main_top);
 
-        // Başlık kartı: tarih ve sıradaki vakit
-        LinearLayout header = Ui.card(this, Ui.LAVENDER);
-        int p = Ui.dp(this, 20);
-        header.setPadding(p, p, p, p);
-        header.addView(Ui.text(this, "🕌 Namaz Vakitleri", 24, Ui.TEXT, true));
-        dateText = Ui.text(this, "", 15, Ui.GREY, false);
-        header.addView(dateText);
-        hijriText = Ui.text(this, "", 14, Ui.GREY, false);
-        header.addView(hijriText);
-        Ui.space(header, 14);
-        nextName = Ui.text(this, "", 17, Ui.PLUM, true);
-        header.addView(nextName);
-        countdown = Ui.text(this, "", 34, Ui.TEXT, true);
-        header.addView(countdown);
-        root.addView(header);
+        // Başlık kartı
+        LinearLayout header = Ui.card(this, R.color.header_bg, R.dimen.pad_header);
+        Ui.add(header, Ui.text(this, "🕌 Namaz Vakitleri", R.style.Text_AppTitle), 0);
+        dateText = Ui.add(header, Ui.text(this, "", R.style.Text_Date), R.dimen.item_gap_title_large);
+        hijriText = Ui.add(header, Ui.text(this, "", R.style.Text_Hijri), R.dimen.item_gap_title);
+        nextLabel = Ui.add(header, Ui.text(this, "", R.style.Text_HeaderLabel), R.dimen.gap_block);
+        countdown = Ui.add(header, Ui.text(this, "", R.style.Text_Countdown), R.dimen.item_gap_title);
+        Ui.add(root, header, 0);
 
-        // Konum: il ve ilçe
-        LinearLayout loc = Ui.card(this, Ui.WHITE);
-        loc.addView(Ui.text(this, "📍 Konum", 15, Ui.PLUM, true));
-        Spinner citySpinner = new Spinner(this);
-        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Cities.NAMES);
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        citySpinner.setAdapter(ad);
+        // Konum kartı
+        LinearLayout loc = Ui.card(this, R.color.surface, R.dimen.pad_card);
+        Ui.add(loc, Ui.text(this, "İl", R.style.Text_SmallBold), 0);
+        Spinner citySpinner = spinner(Cities.NAMES);
         citySpinner.setSelection(Prefs.city(this));
         citySpinner.setOnItemSelectedListener(new SimpleSelect(pos -> {
             if (pos != Prefs.city(this)) {
@@ -121,8 +116,9 @@ public class MainActivity extends Activity {
                 locationChanged();
             }
         }));
-        loc.addView(row("İl", citySpinner));
-        ilceSpinner = new Spinner(this);
+        Ui.add(loc, citySpinner, R.dimen.item_gap_steps);
+        Ui.add(loc, Ui.text(this, "İlçe", R.style.Text_SmallBold), R.dimen.item_gap_detail);
+        ilceSpinner = Ui.add(loc, spinner(new String[0]), R.dimen.item_gap_steps);
         fillIlce();
         ilceSpinner.setOnItemSelectedListener(new SimpleSelect(pos -> {
             String id = Districts.ids(this, Prefs.city(this))[pos];
@@ -131,55 +127,56 @@ public class MainActivity extends Activity {
                 locationChanged();
             }
         }));
-        loc.addView(row("İlçe", ilceSpinner));
-        sourceText = Ui.text(this, "", 13, Ui.GREY, false);
-        sourceText.setPadding(0, Ui.dp(this, 6), 0, 0);
-        loc.addView(sourceText);
-        root.addView(loc);
+        sourceText = Ui.add(loc, Ui.text(this, "", R.style.Text_Small), R.dimen.item_gap_detail);
+        Ui.add(root, loc, R.dimen.gap_block);
 
-        warnBox = Ui.vertical(this);
-        root.addView(warnBox);
+        warnBox = Ui.add(root, Ui.vertical(this), 0);
+        timesBox = Ui.add(root, Ui.vertical(this), R.dimen.gap_block);
 
-        root.addView(Ui.text(this, "Vakte dokunursanız o namazın kılınışını görürsünüz. Sağdaki düğme o vaktin alarmını açar/kapatır.", 13, Ui.GREY, false));
-        timesBox = Ui.vertical(this);
-        root.addView(timesBox);
-
-        Ui.space(root, 6);
-        Button guide = Ui.button(this, "📖 Namaz nasıl kılınır?", Ui.VAKIT_COLORS[0]);
+        // Düğmeler
+        LinearLayout buttons = Ui.vertical(this);
+        Button guide = Ui.add(buttons, Ui.button(this, "📖 Namaz nasıl kılınır?", R.style.Btn_Primary), 0);
         guide.setOnClickListener(v -> openDetail("rehber"));
-        root.addView(guide);
-
-        Button texts = Ui.button(this, "🤲 Dualar ve Sûreler", Ui.VAKIT_COLORS[3]);
+        Button texts = Ui.add(buttons, Ui.button(this, "🤲 Dualar ve Sûreler", R.style.Btn_Primary), R.dimen.gap_row);
         texts.setOnClickListener(v -> startActivity(new Intent(this, TextsActivity.class)));
-        root.addView(texts);
 
-        soundButton = Ui.button(this, "", Ui.VAKIT_COLORS[1]);
-        soundButton.setOnClickListener(v -> chooseSound());
-        root.addView(soundButton);
-        updateSoundButton();
+        LinearLayout soundRow = new LinearLayout(this, null, 0, R.style.SettingRow);
+        soundRow.setOrientation(LinearLayout.HORIZONTAL);
+        soundText = Ui.text(this, "", R.style.Text_SettingRow);
+        soundRow.addView(soundText, Ui.weight1());
+        Ui.addRow(soundRow, Ui.text(this, "›", R.style.Text_Chevron), Ui.wrap(), R.dimen.col_gap);
+        soundRow.setOnClickListener(v -> showSoundSheet());
+        Ui.add(buttons, soundRow, R.dimen.gap_row);
+        updateSoundRow();
 
-        Button test = Ui.button(this, "🔔 Alarmı dene", Ui.LILAC);
-        test.setOnClickListener(v -> testAlarm());
-        root.addView(test);
+        Button test = Ui.add(buttons, Ui.button(this, "🔔 Alarmı dene", R.style.Btn_Secondary), R.dimen.gap_row);
+        test.setOnClickListener(v -> showTestSheet());
+        Ui.add(root, buttons, R.dimen.gap_block);
 
-        Ui.space(root, 8);
-        root.addView(Ui.text(this, "Vakitler, internet olduğunda Diyanet İşleri Başkanlığı'nın seçtiğiniz ilçe için yayınladığı resmi vakitlerden alınır ve 30 gün telefonda saklanır. İnternet yoksa vakitler Diyanet yöntemiyle telefonda hesaplanır.", 12, Ui.GREY, false));
+        Ui.add(root, Ui.text(this, "Vakitler, internet olduğunda Diyanet İşleri Başkanlığı'nın seçtiğiniz ilçe için yayınladığı resmi vakitlerden alınır ve 30 gün telefonda saklanır. İnternet yoksa Diyanet yöntemiyle telefonda hesaplanır.", R.style.Text_Small), R.dimen.gap_block);
     }
 
-    private LinearLayout row(String label, View v) {
-        LinearLayout r = new LinearLayout(this);
-        r.setGravity(Gravity.CENTER_VERTICAL);
-        TextView t = Ui.text(this, label, 16, Ui.TEXT, true);
-        r.addView(t, new LinearLayout.LayoutParams(Ui.dp(this, 48), LinearLayout.LayoutParams.WRAP_CONTENT));
-        r.addView(v, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-        return r;
+    private Spinner spinner(String[] items) {
+        Spinner s = new Spinner(this, Spinner.MODE_DROPDOWN);
+        s.setBackground(getDrawable(R.drawable.spinner_bg));
+        s.setPopupBackgroundDrawable(getDrawable(R.drawable.spinner_popup));
+        int ph = Ui.px(this, R.dimen.spinner_pad_h);
+        s.setPadding(ph, 0, ph, 0);
+        s.setDropDownVerticalOffset(Ui.px(this, R.dimen.spinner_height));
+        s.setAdapter(adapter(items));
+        s.setLayoutParams(new LinearLayout.LayoutParams(Ui.MATCH, Ui.px(this, R.dimen.spinner_height)));
+        return s;
+    }
+
+    private ArrayAdapter<String> adapter(String[] items) {
+        ArrayAdapter<String> ad = new ArrayAdapter<>(this, R.layout.spinner_item, items);
+        ad.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        return ad;
     }
 
     private void fillIlce() {
         int city = Prefs.city(this);
-        ArrayAdapter<String> ad = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, Districts.names(this, city));
-        ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        ilceSpinner.setAdapter(ad);
+        ilceSpinner.setAdapter(adapter(Districts.names(this, city)));
         String[] ids = Districts.ids(this, city);
         String cur = Prefs.ilce(this);
         for (int i = 0; i < ids.length; i++) if (ids[i].equals(cur)) ilceSpinner.setSelection(i);
@@ -198,8 +195,9 @@ public class MainActivity extends Activity {
         dayFmt.setTimeZone(Times.TR);
         dateText.setText(dayFmt.format(now.getTime()));
         String hijri = Diyanet.hijri(this, Prefs.ilce(this), now);
-        hijriText.setText(hijri != null && !hijri.isEmpty() ? hijri : "");
-        hijriText.setVisibility(hijri != null && !hijri.isEmpty() ? View.VISIBLE : View.GONE);
+        boolean hasHijri = hijri != null && !hijri.isEmpty();
+        hijriText.setText(hasHijri ? hijri : "");
+        hijriText.setVisibility(hasHijri ? View.VISIBLE : View.GONE);
 
         int days = Diyanet.daysAhead(this, Prefs.ilce(this));
         sourceText.setText(days > 0
@@ -208,7 +206,6 @@ public class MainActivity extends Activity {
 
         long nowMs = now.getTimeInMillis();
         long[] times = Times.forDay(this, now);
-
         int nextIdx = -1;
         nextTime = 0;
         for (int i = 0; i < PrayerTimes.COUNT; i++) {
@@ -220,7 +217,7 @@ public class MainActivity extends Activity {
             nextIdx = PrayerTimes.IMSAK;
             nextTime = Times.forDay(this, tomorrow)[PrayerTimes.IMSAK];
         }
-        nextName.setText(PrayerInfo.VAKIT_NAMES[nextIdx] + " vaktine kalan");
+        nextLabel.setText(PrayerInfo.VAKIT_NAMES[nextIdx] + " vaktine kalan");
         updateCountdown();
 
         boolean friday = now.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
@@ -228,45 +225,60 @@ public class MainActivity extends Activity {
         hm.setTimeZone(Times.TR);
         timesBox.removeAllViews();
         for (int i = 0; i < PrayerTimes.COUNT; i++) {
-            final int prayer = i;
             boolean isNext = (i == nextIdx) && nextTime == times[i];
-            LinearLayout row = new LinearLayout(this);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            int p = Ui.dp(this, 14);
-            row.setPadding(p, p, Ui.dp(this, 6), p);
-            row.setBackground(isNext
-                    ? Ui.rounded(Ui.VAKIT_COLORS[i], Ui.dp(this, 14), Ui.dp(this, 2), Ui.PLUM)
-                    : Ui.rounded(Ui.VAKIT_COLORS[i], Ui.dp(this, 14)));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, Ui.dp(this, 4), 0, Ui.dp(this, 4));
-            row.setLayoutParams(lp);
+            Ui.add(timesBox, vakitRow(i, hm.format(new Date(times[i])), isNext, friday), R.dimen.gap_row);
+        }
+        refreshWarnings();
+    }
 
-            PrayerInfo info = PrayerInfo.forPrayer(i, friday);
-            LinearLayout names = Ui.vertical(this);
-            String name = (i == PrayerTimes.OGLE && friday) ? "Öğle (Cuma)" : PrayerInfo.VAKIT_NAMES[i];
-            names.addView(Ui.text(this, name, 18, Ui.TEXT, true));
-            String sub = (i == PrayerTimes.GUNES) ? "Namaz vakti değil" : info.summary.replaceFirst("^.*? namazı ", "");
-            names.addView(Ui.text(this, sub, 12, Ui.GREY, false));
-            row.addView(names, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+    /** Vakit satırı: [ad (+ek) + SIRADAKİ | saat] / [rekât özeti]  ·  anahtar */
+    private View vakitRow(int prayer, String time, boolean isNext, boolean friday) {
+        PrayerInfo info = PrayerInfo.forPrayer(prayer, friday);
+        LinearLayout row = Ui.horizontal(this);
+        row.setPadding(Ui.px(this, R.dimen.row_pad_start), Ui.px(this, R.dimen.row_pad_v),
+                Ui.px(this, R.dimen.row_pad_end), Ui.px(this, R.dimen.row_pad_v));
+        row.setBackground(Ui.shape(this, Ui.VAKIT_COLORS[prayer], R.dimen.radius_card, R.dimen.stroke_next,
+                isNext ? R.color.accent : R.color.transparent));
 
-            TextView time = Ui.text(this, hm.format(new Date(times[i])), 22, isNext ? Ui.PLUM : Ui.TEXT, true);
-            time.setPadding(Ui.dp(this, 8), 0, Ui.dp(this, 8), 0);
-            row.addView(time);
+        LinearLayout left = Ui.vertical(this);
+        LinearLayout first = Ui.horizontal(this);
+        SpannableStringBuilder name = new SpannableStringBuilder(PrayerInfo.VAKIT_NAMES[prayer]);
+        String suffix = prayer == PrayerTimes.IMSAK ? "(Sabah)" : (prayer == PrayerTimes.OGLE && friday ? "(Cuma)" : null);
+        if (suffix != null) {
+            int start = name.length() + 1;
+            name.append(' ').append(suffix);
+            name.setSpan(new TextAppearanceSpan(this, R.style.Text_Small), start, name.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        TextView nameView = Ui.text(this, name, R.style.Text_CardTitle);
+        first.addView(nameView, Ui.wrap());
+        if (isNext) {
+            TextView badge = Ui.text(this, "SIRADAKİ", R.style.Text_Badge);
+            badge.setBackground(Ui.shape(this, R.color.accent, R.dimen.radius_badge));
+            Ui.addRow(first, badge, Ui.wrap(), R.dimen.item_gap_steps);
+        }
+        first.addView(new View(this), Ui.weight1());
+        Ui.addRow(first, Ui.text(this, time, R.style.Text_RowTime), Ui.wrap(), R.dimen.col_gap);
+        left.addView(first);
+        String sub = prayer == PrayerTimes.GUNES ? "Namaz vakti değil" : info.shortSummary();
+        Ui.add(left, Ui.text(this, sub, R.style.Text_Small), R.dimen.item_gap_title);
+        row.addView(left, Ui.weight1());
 
-            Switch sw = new Switch(this);
-            sw.setChecked(Prefs.alarmOn(this, i));
+        Switch sw = new Switch(this, null, 0, R.style.VakitSwitch);
+        sw.setContentDescription(PrayerInfo.VAKIT_NAMES[prayer] + " alarmı");
+        if (prayer == PrayerTimes.GUNES) {
+            sw.setChecked(false);
+            sw.setEnabled(false);
+        } else {
+            sw.setChecked(Prefs.alarmOn(this, prayer));
             sw.setOnCheckedChangeListener((b, on) -> {
                 Prefs.setAlarmOn(this, prayer, on);
                 AlarmScheduler.scheduleNext(this);
                 Toast.makeText(this, PrayerInfo.VAKIT_NAMES[prayer] + " alarmı " + (on ? "açıldı" : "kapatıldı"), Toast.LENGTH_SHORT).show();
             });
-            row.addView(sw);
-
             row.setOnClickListener(v -> openDetail(info.key));
-            timesBox.addView(row);
         }
-        refreshWarnings();
+        Ui.addRow(row, sw, Ui.wrap(), R.dimen.col_gap);
+        return row;
     }
 
     private void updateCountdown() {
@@ -277,93 +289,143 @@ public class MainActivity extends Activity {
 
     // ---- Alarm sesi ----
 
-    private static final String[] SOUND_LABELS = {
-            "🎐 Huzur zili (uygulamanın sesi)",
-            "⏰ Telefonun alarm sesi",
-            "🎵 Telefonumdan ses dosyası seç (ilahi vb.)",
-            "📳 Sadece titreşim"
-    };
-
-    private void updateSoundButton() {
-        int mode = Prefs.sound(this);
-        String name = mode == Prefs.SES_OZEL ? "🎵 " + Prefs.customSoundName(this) : SOUND_LABELS[mode];
-        soundButton.setText("Alarm sesi: " + name.replaceFirst(" \\(.*\\)$", ""));
+    private String soundLabel(int mode) {
+        switch (mode) {
+            case Prefs.SES_TELEFON: return "⏰ Telefonun alarm sesi";
+            case Prefs.SES_OZEL: return AlarmSoundService.customFile(this).exists()
+                    ? "🎵 " + Prefs.customSoundName(this) : "🎵 Telefonumdan ses dosyası seç (ilahi vb.)";
+            case Prefs.SES_TITRESIM: return "📳 Sadece titreşim";
+            default: return "🎐 Huzur zili";
+        }
     }
 
-    private void chooseSound() {
-        new AlertDialog.Builder(this)
-                .setTitle("Alarm sesi")
-                .setSingleChoiceItems(SOUND_LABELS, Prefs.sound(this), (d, which) -> {
-                    d.dismiss();
-                    if (which == Prefs.SES_OZEL) {
-                        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                        i.addCategory(Intent.CATEGORY_OPENABLE);
-                        i.setType("audio/*");
-                        try {
-                            startActivityForResult(i, REQ_SOUND_FILE);
-                        } catch (Exception e) {
-                            Toast.makeText(this, "Dosya seçici açılamadı", Toast.LENGTH_LONG).show();
-                        }
-                    } else {
-                        Prefs.setSound(this, which);
-                        updateSoundButton();
-                        offerPreview();
-                    }
-                })
-                .setNegativeButton("Vazgeç", null)
-                .show();
+    private void updateSoundRow() {
+        int mode = Prefs.sound(this);
+        String name = mode == Prefs.SES_OZEL ? Prefs.customSoundName(this)
+                : soundLabel(mode).replaceFirst("^\\S+ ", "");
+        soundText.setText("Alarm sesi: " + name);
+    }
+
+    private void showSoundSheet() {
+        Ui.Sheet sheet = new Ui.Sheet(this, "Alarm sesi");
+        soundGroup = new RadioGroup(this);
+        int[] modes = {Prefs.SES_HUZUR, Prefs.SES_TELEFON, Prefs.SES_OZEL, Prefs.SES_TITRESIM};
+        for (int mode : modes) {
+            RadioButton rb = new RadioButton(this, null, 0, R.style.SoundRadio);
+            rb.setId(View.generateViewId());
+            rb.setTag(mode);
+            rb.setText(soundLabel(mode));
+            RadioGroup.LayoutParams lp = new RadioGroup.LayoutParams(Ui.MATCH, Ui.WRAP);
+            if (soundGroup.getChildCount() > 0) lp.topMargin = Ui.px(this, R.dimen.gap_list);
+            soundGroup.addView(rb, lp);
+            if (mode == Prefs.sound(this)) rb.setChecked(true);
+            rb.setOnClickListener(v -> {
+                if (mode == Prefs.SES_OZEL) {
+                    pickSoundFile();
+                } else {
+                    Prefs.setSound(this, mode);
+                    updateSoundRow();
+                }
+            });
+        }
+        Ui.add(sheet.body, soundGroup, 0);
+
+        LinearLayout actions = Ui.horizontal(this);
+        Button listen = Ui.button(this, "▶ Dinle", R.style.Btn_Secondary_Sheet);
+        listen.setOnClickListener(v -> {
+            if (Prefs.sound(this) == Prefs.SES_TITRESIM) {
+                Toast.makeText(this, "Sadece titreşim seçili; ses çalınmaz.", Toast.LENGTH_SHORT).show();
+            } else {
+                Notifier.preview(this, AlarmScheduler.currentPrayer(this, System.currentTimeMillis()));
+            }
+        });
+        actions.addView(listen, Ui.weight1());
+        Button ok = Ui.button(this, "Tamam", R.style.Btn_Primary_Sheet);
+        ok.setOnClickListener(v -> sheet.dialog.dismiss());
+        Ui.addRow(actions, ok, Ui.weight1(), R.dimen.gap_row);
+        Ui.add(sheet.body, actions, R.dimen.gap_block);
+
+        sheet.dialog.setOnDismissListener(d -> {
+            soundGroup = null;
+            stopPreview();
+        });
+        sheet.show();
+    }
+
+    private void stopPreview() {
+        if (AlarmSoundService.running) {
+            startService(new Intent(this, AlarmSoundService.class).setAction(AlarmSoundService.ACTION_DISMISS));
+        }
+    }
+
+    private void pickSoundFile() {
+        Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        i.addCategory(Intent.CATEGORY_OPENABLE);
+        i.setType("audio/*");
+        try {
+            startActivityForResult(i, REQ_SOUND_FILE);
+        } catch (Exception e) {
+            Toast.makeText(this, "Dosya seçici açılamadı", Toast.LENGTH_LONG).show();
+            syncSoundRadios();
+        }
+    }
+
+    /** Pencere açıksa radyo seçimini kayıtlı ayara eşitler. */
+    private void syncSoundRadios() {
+        if (soundGroup == null) return;
+        for (int i = 0; i < soundGroup.getChildCount(); i++) {
+            RadioButton rb = (RadioButton) soundGroup.getChildAt(i);
+            int mode = (int) rb.getTag();
+            rb.setText(soundLabel(mode));
+            if (mode == Prefs.sound(this)) rb.setChecked(true);
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQ_SOUND_FILE || resultCode != RESULT_OK || data == null || data.getData() == null) return;
-        Uri uri = data.getData();
-        try (InputStream in = getContentResolver().openInputStream(uri);
-             OutputStream out = new FileOutputStream(AlarmSoundService.customFile(this))) {
-            byte[] buf = new byte[64 * 1024];
-            int n;
-            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
-        } catch (Exception e) {
-            Toast.makeText(this, "Ses dosyası kopyalanamadı", Toast.LENGTH_LONG).show();
-            return;
+        if (requestCode != REQ_SOUND_FILE) return;
+        if (resultCode == RESULT_OK && data != null && data.getData() != null) {
+            Uri uri = data.getData();
+            boolean copied = false;
+            try (InputStream in = getContentResolver().openInputStream(uri);
+                 OutputStream out = new FileOutputStream(AlarmSoundService.customFile(this))) {
+                byte[] buf = new byte[64 * 1024];
+                int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                copied = true;
+            } catch (Exception e) {
+                Toast.makeText(this, "Ses dosyası kopyalanamadı", Toast.LENGTH_LONG).show();
+            }
+            if (copied) {
+                String name = "Seçilen ses";
+                try (Cursor cur = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
+                    if (cur != null && cur.moveToFirst()) name = cur.getString(0).replaceFirst("\\.[A-Za-z0-9]+$", "");
+                } catch (Exception ignored) {}
+                Prefs.setCustomSoundName(this, name);
+                Prefs.setSound(this, Prefs.SES_OZEL);
+            }
         }
-        String name = "Seçilen ses";
-        try (Cursor cur = getContentResolver().query(uri, new String[]{OpenableColumns.DISPLAY_NAME}, null, null, null)) {
-            if (cur != null && cur.moveToFirst()) name = cur.getString(0).replaceFirst("\\.[A-Za-z0-9]+$", "");
-        } catch (Exception ignored) {}
-        Prefs.setCustomSoundName(this, name);
-        Prefs.setSound(this, Prefs.SES_OZEL);
-        updateSoundButton();
-        offerPreview();
+        updateSoundRow();
+        syncSoundRadios();
     }
 
-    private void offerPreview() {
-        if (Prefs.sound(this) == Prefs.SES_TITRESIM) return;
-        new AlertDialog.Builder(this)
-                .setMessage("Seçtiğiniz sesi şimdi dinlemek ister misiniz?")
-                .setPositiveButton("Dinle", (d, w) -> playNow())
-                .setNegativeButton("Hayır", null)
-                .show();
-    }
-
-    private void playNow() {
-        Notifier.alarm(this, AlarmScheduler.currentPrayer(this, System.currentTimeMillis()));
-        Toast.makeText(this, "Durdurmak için bildirimdeki “Sesi durdur”a basın.", Toast.LENGTH_LONG).show();
-    }
-
-    private void testAlarm() {
-        new AlertDialog.Builder(this)
-                .setTitle("Alarmı dene")
-                .setItems(new String[]{"Şimdi çal", "1 dakika sonra çal (ekranı kilitleyip bekleyin)"}, (d, which) -> {
-                    if (which == 0) {
-                        playNow();
-                    } else {
-                        AlarmScheduler.scheduleTest(this);
-                        Toast.makeText(this, "Test alarmı 1 dakika sonra çalacak.", Toast.LENGTH_LONG).show();
-                    }
-                })
-                .show();
+    private void showTestSheet() {
+        Ui.Sheet sheet = new Ui.Sheet(this, "Alarmı dene");
+        Ui.add(sheet.body, Ui.text(this, "“1 dakika sonra” seçeneğinde ekranı kilitleyip bekleyin; alarm kilit ekranında tam ekran görünür.", R.style.Text_Body), 0);
+        Button now = Ui.add(sheet.body, Ui.button(this, "Şimdi çal", R.style.Btn_Primary_Sheet), R.dimen.gap_block);
+        now.setOnClickListener(v -> {
+            sheet.dialog.dismiss();
+            Notifier.preview(this, AlarmScheduler.currentPrayer(this, System.currentTimeMillis()));
+            Toast.makeText(this, "Durdurmak için bildirimdeki “Sesi durdur”a basın.", Toast.LENGTH_LONG).show();
+        });
+        Button later = Ui.add(sheet.body, Ui.button(this, "1 dakika sonra çal", R.style.Btn_Secondary_Sheet), R.dimen.gap_row);
+        later.setOnClickListener(v -> {
+            sheet.dialog.dismiss();
+            AlarmScheduler.scheduleTest(this);
+            Toast.makeText(this, "Test alarmı 1 dakika sonra çalacak.", Toast.LENGTH_LONG).show();
+        });
+        sheet.show();
     }
 
     // ---- Uyarılar ----
@@ -379,6 +441,11 @@ public class MainActivity extends Activity {
                 startActivity(i);
             });
         }
+        if (Build.VERSION.SDK_INT >= 34 && !nm.canUseFullScreenIntent()) {
+            addWarning("⚠️ Kilit ekranında tam ekran alarm izni kapalı. Alarm yalnızca bildirim olarak görünür.", "İzni ver", () ->
+                    startActivity(new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                            Uri.parse("package:" + getPackageName()))));
+        }
         if (Build.VERSION.SDK_INT >= 31) {
             AlarmManager am = getSystemService(AlarmManager.class);
             if (!am.canScheduleExactAlarms()) {
@@ -389,7 +456,7 @@ public class MainActivity extends Activity {
         }
         PowerManager pm = getSystemService(PowerManager.class);
         if (!pm.isIgnoringBatteryOptimizations(getPackageName())) {
-            addWarning("💡 Bazı telefonlar pil tasarrufu için alarmları geciktirir. Alarmın her zaman tam vaktinde çalması için pil kısıtlamasını kaldırın.",
+            addWarning("Bazı telefonlar pil tasarrufu için alarmları geciktirir.",
                     "Pil kısıtlamasını kaldır", () -> {
                         try {
                             startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
@@ -402,12 +469,13 @@ public class MainActivity extends Activity {
     }
 
     private void addWarning(String msg, String action, Runnable r) {
-        LinearLayout card = Ui.card(this, Ui.PEACH);
-        card.addView(Ui.text(this, msg, 14, Ui.TEXT, false));
-        Button b = Ui.button(this, action, Ui.WHITE);
+        LinearLayout card = Ui.card(this, R.color.warning_bg, R.dimen.pad_card);
+        Ui.add(card, Ui.text(this, msg, R.style.Text_Body), 0);
+        Button b = Ui.add(card, Ui.button(this, action, R.style.Btn_Primary_Small), R.dimen.item_gap_detail);
         b.setOnClickListener(v -> r.run());
-        card.addView(b);
-        warnBox.addView(card);
+        Ui.add(warnBox, card, R.dimen.gap_block);
+        // İlk uyarının da üstünde blok boşluğu olsun.
+        ((LinearLayout.LayoutParams) card.getLayoutParams()).topMargin = Ui.px(this, R.dimen.gap_block);
     }
 
     private void openDetail(String key) {

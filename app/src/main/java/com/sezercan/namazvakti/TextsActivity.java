@@ -3,8 +3,6 @@ package com.sezercan.namazvakti;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,105 +16,98 @@ public class TextsActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
-        LinearLayout root = Ui.page(this);
         int cat = getIntent().getIntExtra(EXTRA_CAT, -1);
         int item = getIntent().getIntExtra(EXTRA_ITEM, -1);
         Texts.Category[] cats = Texts.all(this);
 
-        if (cat < 0 || cat >= cats.length) buildCategories(root, cats);
-        else if (item < 0 || item >= cats[cat].items.length) buildList(root, cat, cats[cat]);
-        else buildDetail(root, cat, cats[cat], item);
+        if (cat < 0 || cat >= cats.length) {
+            buildCategories(Ui.page(this, "Vakitler", R.dimen.main_top), cats);
+        } else if (item < 0 || item >= cats[cat].items.length) {
+            buildList(Ui.page(this, "Dualar ve Sûreler", R.dimen.main_top), cat, cats[cat]);
+        } else {
+            buildDetail(Ui.page(this, cats[cat].name, R.dimen.main_top), cat, cats[cat], item);
+        }
     }
 
     private void buildCategories(LinearLayout root, Texts.Category[] cats) {
-        LinearLayout header = Ui.card(this, Ui.LAVENDER);
-        header.addView(Ui.text(this, "🤲 Dualar ve Sûreler", 26, Ui.TEXT, true));
-        header.addView(Ui.text(this, "Arapça yazılışı, okunuşu ve anlamıyla", 15, Ui.GREY, false));
-        root.addView(header);
+        Ui.add(root, Ui.text(this, "Dualar ve Sûreler", R.style.Text_PrayerTitle), 0);
+        Ui.add(root, Ui.text(this, "Arapça yazılışı, okunuşu ve anlamıyla", R.style.Text_Subtitle), R.dimen.item_gap_title_large);
 
         for (int i = 0; i < cats.length; i++) {
             final int idx = i;
             Texts.Category c = cats[i];
-            LinearLayout card = Ui.card(this, c.color);
-            card.addView(Ui.text(this, c.name, 20, Ui.TEXT, true));
-            card.addView(Ui.text(this, c.description + " • " + c.items.length + " başlık", 14, Ui.GREY, false));
-            card.setOnClickListener(v -> open(idx, -1));
-            root.addView(card);
+            LinearLayout card = Ui.horizontal(this);
+            card.setMinimumHeight(Ui.px(this, R.dimen.category_min));
+            int v = Ui.px(this, R.dimen.cat_pad_v), h = Ui.px(this, R.dimen.cat_pad_h);
+            card.setPadding(h, v, h, v);
+            card.setBackground(Ui.shape(this, c.colorRes, R.dimen.radius_card));
+            LinearLayout texts = Ui.vertical(this);
+            Ui.add(texts, Ui.text(this, c.name, R.style.Text_CategoryTitle), 0);
+            Ui.add(texts, Ui.text(this, c.description + " • " + c.items.length + " başlık", R.style.Text_Subtitle), R.dimen.item_gap_title);
+            card.addView(texts, Ui.weight1());
+            Ui.addRow(card, Ui.text(this, "›", R.style.Text_ChevronLarge), Ui.wrap(), R.dimen.col_gap);
+            card.setOnClickListener(v2 -> open(idx, -1));
+            Ui.add(root, card, i == 0 ? R.dimen.gap_block : R.dimen.gap_category);
         }
     }
 
     private void buildList(LinearLayout root, int catIdx, Texts.Category cat) {
-        LinearLayout header = Ui.card(this, cat.color);
-        header.addView(Ui.text(this, cat.name, 26, Ui.TEXT, true));
-        header.addView(Ui.text(this, cat.description, 15, Ui.GREY, false));
-        root.addView(header);
+        Ui.add(root, Ui.text(this, cat.name, R.style.Text_PrayerTitle), 0);
+        Ui.add(root, Ui.text(this, cat.description, R.style.Text_Subtitle), R.dimen.item_gap_title_large);
 
         for (int i = 0; i < cat.items.length; i++) {
             final int idx = i;
-            Texts.Item it = cat.items[i];
-            LinearLayout row = new LinearLayout(this);
-            row.setGravity(Gravity.CENTER_VERTICAL);
-            int p = Ui.dp(this, 16);
-            row.setPadding(p, p, p, p);
-            row.setBackground(Ui.rounded(Ui.WHITE, Ui.dp(this, 14)));
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            lp.setMargins(0, Ui.dp(this, 4), 0, Ui.dp(this, 4));
-            row.setLayoutParams(lp);
-
-            TextView num = Ui.text(this, String.valueOf(i + 1), 15, Ui.PLUM, true);
-            num.setGravity(Gravity.CENTER);
-            num.setBackground(Ui.rounded(cat.color, Ui.dp(this, 16)));
-            row.addView(num, new LinearLayout.LayoutParams(Ui.dp(this, 32), Ui.dp(this, 32)));
-
-            TextView title = Ui.text(this, it.title, 18, Ui.TEXT, true);
-            title.setPadding(Ui.dp(this, 12), 0, 0, 0);
-            row.addView(title, new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-            row.addView(Ui.text(this, "›", 24, Ui.GREY, false));
+            LinearLayout row = Ui.horizontal(this);
+            row.setMinimumHeight(Ui.px(this, R.dimen.list_row_min));
+            int p = Ui.px(this, R.dimen.pad_card);
+            row.setPadding(p, Ui.px(this, R.dimen.item_gap_title), p, Ui.px(this, R.dimen.item_gap_title));
+            row.setBackground(Ui.shape(this, R.color.surface, R.dimen.radius_card, R.dimen.stroke_card, R.color.border_card));
+            row.addView(Ui.circle(this, String.valueOf(i + 1), R.dimen.num_medium, R.style.Text_NumMedium, cat.colorRes));
+            Ui.addRow(row, Ui.text(this, cat.items[i].title, R.style.Text_ListRow), Ui.weight1(), R.dimen.col_gap);
+            Ui.addRow(row, Ui.text(this, "›", R.style.Text_Chevron), Ui.wrap(), R.dimen.col_gap);
             row.setOnClickListener(v -> open(catIdx, idx));
-            root.addView(row);
+            Ui.add(root, row, i == 0 ? R.dimen.gap_detail : R.dimen.gap_list);
         }
     }
 
     private void buildDetail(LinearLayout root, int catIdx, Texts.Category cat, int itemIdx) {
         Texts.Item it = cat.items[itemIdx];
-        LinearLayout header = Ui.card(this, cat.color);
-        header.addView(Ui.text(this, cat.name, 14, Ui.GREY, false));
-        header.addView(Ui.text(this, it.title, 26, Ui.TEXT, true));
-        root.addView(header);
+        Ui.add(root, Ui.text(this, cat.name, R.style.Text_Label), 0);
+        Ui.add(root, Ui.text(this, it.title, R.style.Text_TextDetailTitle), R.dimen.item_gap_title);
 
-        LinearLayout arCard = Ui.card(this, Ui.WHITE);
-        arCard.addView(Ui.text(this, "Arapça", 14, Ui.PLUM, true));
-        TextView ar = Ui.text(this, it.arabic, 26, Ui.TEXT, false);
-        ar.setTextDirection(View.TEXT_DIRECTION_RTL);
-        ar.setGravity(Gravity.END);
-        ar.setLineSpacing(0, 1.6f);
-        ar.setTextIsSelectable(true);
-        arCard.addView(ar);
-        root.addView(arCard);
+        // Arapça (besmele ayrı satırda, ortalı)
+        LinearLayout ar = Ui.card(this, R.color.card_arabic, R.dimen.pad_detail);
+        Ui.add(ar, Ui.text(this, "Arapça", R.style.Text_Label), 0);
+        String arabic = it.arabic;
+        int nl = arabic.indexOf('\n');
+        if (nl > 0 && arabic.startsWith("بِسْمِ")) {
+            Ui.add(ar, Ui.text(this, arabic.substring(0, nl), R.style.Text_Besmele), R.dimen.item_gap_detail);
+            arabic = arabic.substring(nl + 1);
+        }
+        Ui.add(ar, Ui.text(this, arabic, R.style.Text_Arabic), R.dimen.item_gap_detail);
+        Ui.add(root, ar, R.dimen.gap_detail);
 
-        LinearLayout rd = Ui.card(this, Ui.WHITE);
-        rd.addView(Ui.text(this, "Okunuşu", 14, Ui.PLUM, true));
-        TextView reading = Ui.text(this, it.reading, 17, Ui.TEXT, false);
+        LinearLayout rd = Ui.card(this, R.color.card_reading, R.dimen.pad_detail);
+        Ui.add(rd, Ui.text(this, "Okunuşu", R.style.Text_Label), 0);
+        TextView reading = Ui.add(rd, Ui.text(this, it.reading, R.style.Text_Reading), R.dimen.item_gap_detail);
         reading.setTextIsSelectable(true);
-        rd.addView(reading);
-        root.addView(rd);
+        Ui.add(root, rd, R.dimen.gap_detail);
 
-        LinearLayout mn = Ui.card(this, Ui.WHITE);
-        mn.addView(Ui.text(this, "Anlamı", 14, Ui.PLUM, true));
-        mn.addView(Ui.text(this, it.meaning, 16, Ui.TEXT, false));
-        root.addView(mn);
+        LinearLayout mn = Ui.card(this, R.color.card_meaning, R.dimen.pad_detail);
+        Ui.add(mn, Ui.text(this, "Anlamı", R.style.Text_Label), 0);
+        Ui.add(mn, Ui.text(this, it.meaning, R.style.Text_Reading), R.dimen.item_gap_detail);
+        Ui.add(root, mn, R.dimen.gap_detail);
 
         if (it.note != null) {
-            LinearLayout note = Ui.card(this, Ui.CREAM_NOTE);
-            note.addView(Ui.text(this, "ℹ️ " + it.note, 15, Ui.TEXT, false));
-            root.addView(note);
+            LinearLayout note = Ui.card(this, R.color.info_bg, R.dimen.pad_card);
+            Ui.add(note, Ui.text(this, "ℹ️ " + it.note, R.style.Text_Body), 0);
+            Ui.add(root, note, R.dimen.gap_detail);
         }
 
         if (itemIdx + 1 < cat.items.length) {
-            Button next = Ui.button(this, "Sonraki: " + cat.items[itemIdx + 1].title + "  ›", cat.color);
+            Button next = Ui.button(this, "Sonraki: " + cat.items[itemIdx + 1].title + " ›", R.style.Btn_Primary);
             next.setOnClickListener(v -> { open(catIdx, itemIdx + 1); finish(); });
-            root.addView(next);
+            Ui.add(root, next, R.dimen.gap_detail);
         }
     }
 

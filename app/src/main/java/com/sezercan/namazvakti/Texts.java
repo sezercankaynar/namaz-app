@@ -1,8 +1,6 @@
 package com.sezercan.namazvakti;
 
 import android.content.Context;
-import android.graphics.Color;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -23,17 +21,22 @@ public final class Texts {
 
     public static final class Category {
         public final String name, description;
-        public final int color;
+        /** Kategori rengi (colors.xml'deki cat_* değerleri, sırasıyla). */
+        public final int colorRes;
         public final Item[] items;
-        Category(JSONObject o) throws org.json.JSONException {
+        Category(JSONObject o, int colorRes) throws org.json.JSONException {
             name = o.getString("kategori");
             description = o.optString("aciklama");
-            color = Color.parseColor(o.optString("renk", "#E4D9F5"));
+            this.colorRes = colorRes;
             JSONArray a = o.getJSONArray("ogeler");
             items = new Item[a.length()];
             for (int i = 0; i < a.length(); i++) items[i] = new Item(a.getJSONObject(i));
         }
     }
+
+    private static final int[] COLORS = {
+            R.color.cat_dualar, R.color.cat_fatiha, R.color.cat_kisa_sureler, R.color.cat_ayetler, R.color.cat_tesbihat
+    };
 
     private static Category[] all;
 
@@ -42,7 +45,7 @@ public final class Texts {
             try {
                 JSONArray a = new JSONArray(Districts.Assets.read(c, "metinler.json"));
                 Category[] r = new Category[a.length()];
-                for (int i = 0; i < a.length(); i++) r[i] = new Category(a.getJSONObject(i));
+                for (int i = 0; i < a.length(); i++) r[i] = new Category(a.getJSONObject(i), COLORS[i % COLORS.length]);
                 all = r;
             } catch (Exception e) {
                 throw new IllegalStateException(e);

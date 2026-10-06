@@ -3,12 +3,20 @@ package com.sezercan.namazvakti;
 /** Her vakit için rekât sayıları ve kısa kılınış tarifi (Hanefî mezhebi, Diyanet). */
 public final class PrayerInfo {
 
+    /** Bölüm türü; detay ekranındaki kart rengini belirler. */
+    public static final int SUNNET = 0, FARZ = 1, SON_SUNNET = 2, VITIR = 3;
+
     public static final class Part {
+        public final int kind;
         public final String title;   // örn. "2 rekât sünnet"
         public final String niyet;
-        public final String steps;
-        Part(String title, String niyet, String steps) {
-            this.title = title; this.niyet = niyet; this.steps = steps;
+        public final String steps;   // her satır bir adım
+        Part(int kind, String title, String niyet, String steps) {
+            this.kind = kind; this.title = title; this.niyet = niyet; this.steps = steps;
+        }
+
+        public String[] stepList() {
+            return steps.split("\n");
         }
     }
 
@@ -20,7 +28,7 @@ public final class PrayerInfo {
         this.summary = summary; this.note = note; this.parts = parts;
     }
 
-    public static final String[] VAKIT_NAMES = {"İmsak (Sabah)", "Güneş", "Öğle", "İkindi", "Akşam", "Yatsı"};
+    public static final String[] VAKIT_NAMES = {"İmsak", "Güneş", "Öğle", "İkindi", "Akşam", "Yatsı"};
 
     // ---- Kılınış tarifleri ----
     private static final String IKI =
@@ -52,7 +60,7 @@ public final class PrayerInfo {
           + "3. rekât: Yalnız Besmele ve Fâtiha oku; rükû, iki secde.\n"
           + "Son oturuş: Ettehiyyâtü, Salli, Bârik, Rabbenâ; sonra selam.";
 
-    private static final String VITIR =
+    private static final String VITIR_STEPS =
             "1. ve 2. rekât: Fâtiha + kısa sûre; 2. rekât sonunda otur, yalnız Ettehiyyâtü oku ve kalk.\n"
           + "3. rekât: Fâtiha ve sûreden sonra “Allâhu Ekber” deyip ellerini kulak hizasına kaldır, tekrar bağla ve Kunut dualarını oku.\n"
           + "Sonra rükû, iki secde, son oturuş (Ettehiyyâtü, Salli, Bârik, Rabbenâ) ve selam.";
@@ -65,8 +73,8 @@ public final class PrayerInfo {
             "🕌 Sabah namazı vakti girdi",
             "Sabah namazı 4 rekât: 2 sünnet + 2 farz",
             "Sabah namazının vakti güneş doğana kadar sürer.",
-            new Part("2 rekât sünnet", niyet("sabah", "sünnetini"), IKI),
-            new Part("2 rekât farz", niyet("sabah", "farzını"), IKI));
+            new Part(SUNNET, "2 rekât sünnet", niyet("sabah", "sünnetini"), IKI),
+            new Part(FARZ, "2 rekât farz", niyet("sabah", "farzını"), IKI));
 
     public static final PrayerInfo GUNES = new PrayerInfo("gunes", "Güneş Doğuşu",
             "☀️ Güneş doğdu",
@@ -78,43 +86,60 @@ public final class PrayerInfo {
             "🕌 Öğle namazı vakti girdi",
             "Öğle namazı 10 rekât: 4 ilk sünnet + 4 farz + 2 son sünnet",
             null,
-            new Part("4 rekât ilk sünnet", niyet("öğle", "ilk sünnetini"), DORT_SUNNET),
-            new Part("4 rekât farz", niyet("öğle", "farzını"), DORT_FARZ),
-            new Part("2 rekât son sünnet", niyet("öğle", "son sünnetini"), IKI));
+            new Part(SUNNET, "4 rekât ilk sünnet", niyet("öğle", "ilk sünnetini"), DORT_SUNNET),
+            new Part(FARZ, "4 rekât farz", niyet("öğle", "farzını"), DORT_FARZ),
+            new Part(SON_SUNNET, "2 rekât son sünnet", niyet("öğle", "son sünnetini"), IKI));
 
     public static final PrayerInfo CUMA = new PrayerInfo("cuma", "Cuma Namazı",
             "🕌 Bugün Cuma — öğle vakti girdi",
             "Cuma namazı 10 rekât: 4 ilk sünnet + 2 farz (cemaatle) + 4 son sünnet",
             "Cuma namazının farzı camide cemaatle, imamın arkasında kılınır. "
           + "Cuma kılamayanlar (yolcu, hasta, kadınlar) normal öğle namazını kılar.",
-            new Part("4 rekât ilk sünnet", niyet("cuma", "ilk sünnetini"), DORT_SUNNET),
-            new Part("2 rekât farz (cemaatle)", "“Niyet ettim Allah rızası için bugünkü cuma namazının farzını kılmaya, uydum hazır olan imama.”",
+            new Part(SUNNET, "4 rekât ilk sünnet", niyet("cuma", "ilk sünnetini"), DORT_SUNNET),
+            new Part(FARZ, "2 rekât farz (cemaatle)", "“Niyet ettim Allah rızası için bugünkü cuma namazının farzını kılmaya, uydum hazır olan imama.”",
                     "İmamla birlikte tekbir al, Sübhâneke'yi oku ve sus; imam sesli okurken dinle. "
                   + "Rükû ve secdeleri imamla birlikte yap. Oturuşta Ettehiyyâtü, Salli, Bârik ve Rabbenâ'yı oku, imamla selam ver."),
-            new Part("4 rekât son sünnet", niyet("cuma", "son sünnetini"), DORT_SUNNET));
+            new Part(SON_SUNNET, "4 rekât son sünnet", niyet("cuma", "son sünnetini"), DORT_SUNNET));
 
     public static final PrayerInfo IKINDI = new PrayerInfo("ikindi", "İkindi Namazı",
             "🕌 İkindi namazı vakti girdi",
             "İkindi namazı 8 rekât: 4 sünnet + 4 farz",
             null,
-            new Part("4 rekât sünnet", niyet("ikindi", "sünnetini"), DORT_SUNNET_GAYRI_MUEKKED),
-            new Part("4 rekât farz", niyet("ikindi", "farzını"), DORT_FARZ));
+            new Part(SUNNET, "4 rekât sünnet", niyet("ikindi", "sünnetini"), DORT_SUNNET_GAYRI_MUEKKED),
+            new Part(FARZ, "4 rekât farz", niyet("ikindi", "farzını"), DORT_FARZ));
 
     public static final PrayerInfo AKSAM = new PrayerInfo("aksam", "Akşam Namazı",
             "🕌 Akşam namazı vakti girdi",
             "Akşam namazı 5 rekât: 3 farz + 2 sünnet",
             "Akşam namazında önce farz, sonra sünnet kılınır.",
-            new Part("3 rekât farz", niyet("akşam", "farzını"), UC_FARZ),
-            new Part("2 rekât sünnet", niyet("akşam", "sünnetini"), IKI));
+            new Part(FARZ, "3 rekât farz", niyet("akşam", "farzını"), UC_FARZ),
+            new Part(SUNNET, "2 rekât sünnet", niyet("akşam", "sünnetini"), IKI));
 
     public static final PrayerInfo YATSI = new PrayerInfo("yatsi", "Yatsı Namazı",
             "🕌 Yatsı namazı vakti girdi",
             "Yatsı namazı 13 rekât: 4 ilk sünnet + 4 farz + 2 son sünnet + 3 vitir",
             "Vitir namazı vaciptir; yatsıdan sonra, imsak vaktine kadar kılınabilir.",
-            new Part("4 rekât ilk sünnet", niyet("yatsı", "ilk sünnetini"), DORT_SUNNET_GAYRI_MUEKKED),
-            new Part("4 rekât farz", niyet("yatsı", "farzını"), DORT_FARZ),
-            new Part("2 rekât son sünnet", niyet("yatsı", "son sünnetini"), IKI),
-            new Part("3 rekât vitir (vacip)", "“Niyet ettim Allah rızası için vitir namazını kılmaya.”", VITIR));
+            new Part(SUNNET, "4 rekât ilk sünnet", niyet("yatsı", "ilk sünnetini"), DORT_SUNNET_GAYRI_MUEKKED),
+            new Part(FARZ, "4 rekât farz", niyet("yatsı", "farzını"), DORT_FARZ),
+            new Part(SON_SUNNET, "2 rekât son sünnet", niyet("yatsı", "son sünnetini"), IKI),
+            new Part(VITIR, "3 rekât vitir (vacip)", "“Niyet ettim Allah rızası için vitir namazını kılmaya.”", VITIR_STEPS));
+
+    /** "Öğle namazı 10 rekât: …" → "10 rekât: …" */
+    public String shortSummary() {
+        return summary.replaceFirst("^.*? namazı ", "");
+    }
+
+    /** Bu namazın vakit indeksi (renk için). */
+    public int prayerIndex() {
+        switch (key) {
+            case "sabah": return PrayerTimes.IMSAK;
+            case "gunes": return PrayerTimes.GUNES;
+            case "ogle": case "cuma": return PrayerTimes.OGLE;
+            case "ikindi": return PrayerTimes.IKINDI;
+            case "aksam": return PrayerTimes.AKSAM;
+            default: return PrayerTimes.YATSI;
+        }
+    }
 
     public static PrayerInfo forPrayer(int prayer, boolean friday) {
         switch (prayer) {

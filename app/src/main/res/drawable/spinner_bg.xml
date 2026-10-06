@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="@dimen/radius_spinner" />
+            <solid android:color="@color/bg" />
+            <stroke android:width="@dimen/stroke_card" android:color="@color/border_input" />
+        </shape>
+    </item>
+    <item android:gravity="end|center_vertical" android:right="@dimen/spinner_chevron_inset"
+        android:width="@dimen/spinner_chevron" android:height="@dimen/spinner_chevron"
+        android:drawable="@drawable/ic_chevron_down" />
+</layer-list>

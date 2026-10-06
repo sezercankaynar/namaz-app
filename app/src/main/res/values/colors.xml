@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Temel -->
+    <color name="bg">#FFF9F5</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#1E2747</color>
+    <color name="text_secondary">#586079</color>
+    <color name="accent">#2B3A67</color>
+    <color name="navy_dark">#1F2A4D</color>
+    <color name="header_bg">#24305E</color>
+    <color name="header_text">#FFFFFF</color>
+    <color name="header_text_secondary">#C3CAE8</color>
+    <color name="header_label">#FFCBA8</color>
+    <color name="border_card">#E3E1EE</color>
+    <color name="border_input">#CFD3E6</color>
+    <color name="divider">#ECEBF3</color>
+    <color name="row_selected">#ECEEF7</color>
+    <color name="switch_on">#2B3A67</color>
+    <color name="switch_off">#C9CDDC</color>
+    <color name="switch_thumb">#FFFFFF</color>
+    <color name="radio_on">#2B3A67</color>
+    <color name="radio_off">#A9AFC4</color>
+    <color name="scrim">#73141B33</color>
+    <color name="warning_bg">#FFCBA8</color>
+    <color name="info_bg">#FFEDC2</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Vakit renkleri -->
+    <color name="imsak">#BBD9F2</color>
+    <color name="gunes">#FBE2A2</color>
+    <color name="ogle">#FFCBA8</color>
+    <color name="ikindi">#F7C4CB</color>
+    <color name="aksam">#D2C2EE</color>
+    <color name="yatsi">#BCC5EE</color>
+
+    <!-- Namaz detay bölüm kartları -->
+    <color name="part_sunnet">#BCC5EE</color>
+    <color name="part_farz">#F7C4CB</color>
+    <color name="part_son_sunnet">#BBD9F2</color>
+    <color name="part_vitir">#FBE2A2</color>
+
+    <!-- Dua kategorileri -->
+    <color name="cat_dualar">#D2C2EE</color>
+    <color name="cat_fatiha">#FBE2A2</color>
+    <color name="cat_kisa_sureler">#BBD9F2</color>
+    <color name="cat_ayetler">#F7C4CB</color>
+    <color name="cat_tesbihat">#FFCBA8</color>
+
+    <!-- Dua/Sûre detay kartları -->
+    <color name="card_arabic">#FFFFFF</color>
+    <color name="card_reading">#D2C2EE</color>
+    <color name="card_meaning">#BBD9F2</color>
+    <color name="step_circle">#D2C2EE</color>
+</resources>

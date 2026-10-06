@@ -34,8 +34,9 @@ public final class Prefs {
     }
 
     public static boolean alarmOn(Context c, int prayer) {
-        // Güneş doğuşu bir namaz vakti değil; varsayılan olarak kapalı.
-        return sp(c).getBoolean("alarm_" + prayer, prayer != PrayerTimes.GUNES);
+        // Güneş doğuşu bir namaz vakti değil; alarmı her zaman kapalı.
+        if (prayer == PrayerTimes.GUNES) return false;
+        return sp(c).getBoolean("alarm_" + prayer, true);
     }
 
     public static void setAlarmOn(Context c, int prayer, boolean on) {

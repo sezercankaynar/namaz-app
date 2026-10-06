@@ -55,22 +55,32 @@ public final class Notifier {
 
     /** Vakit alarmını başlatır: sesi çalan servisi açar; olmazsa sesli yedek bildirim gösterir. */
     public static void alarm(Context c, int prayer) {
+        start(c, prayer, false);
+    }
+
+    /** Uygulama içinden sesi dinletir (kilit ekranı alarmı açılmaz). */
+    public static void preview(Context c, int prayer) {
+        start(c, prayer, true);
+    }
+
+    private static void start(Context c, int prayer, boolean preview) {
         ensureChannel(c);
         Intent svc = new Intent(c, AlarmSoundService.class);
         svc.putExtra(AlarmScheduler.EXTRA_PRAYER, prayer);
+        svc.putExtra(AlarmSoundService.EXTRA_PREVIEW, preview);
         try {
             c.startForegroundService(svc);
         } catch (Exception e) {
             c.getSystemService(NotificationManager.class)
-                    .notify(notificationId(prayer), build(c, prayer, false, CHANNEL_FALLBACK));
+                    .notify(notificationId(prayer), build(c, prayer, false, !preview, CHANNEL_FALLBACK));
         }
     }
 
-    static Notification build(Context c, int prayer, boolean playing) {
-        return build(c, prayer, playing, CHANNEL);
+    static Notification build(Context c, int prayer, boolean playing, boolean fullScreen) {
+        return build(c, prayer, playing, fullScreen, CHANNEL);
     }
 
-    static Notification build(Context c, int prayer, boolean playing, String channel) {
+    static Notification build(Context c, int prayer, boolean playing, boolean fullScreen, String channel) {
         boolean friday = Times.today().get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
         PrayerInfo info = PrayerInfo.forPrayer(prayer, friday);
 
@@ -88,19 +98,27 @@ public final class Notifier {
         PendingIntent dismissPi = PendingIntent.getService(c, 201, dismiss,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        String text = info.summary + "\nNasıl kılındığını görmek için dokunun.";
+        String text = info.summary + (info.summary.endsWith(".") ? "" : ".") + " Nasıl kılındığını görmek için dokunun.";
         Notification.Builder b = new Notification.Builder(c, channel)
-                .setSmallIcon(R.drawable.ic_stat_moon)
+                .setSmallIcon(R.drawable.ic_stat_vakit)
                 .setContentTitle(info.alarmTitle)
-                .setContentText(info.summary)
+                .setContentText(text)
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setCategory(Notification.CATEGORY_ALARM)
-                .setColor(Ui.PLUM)
+                .setColor(c.getColor(R.color.accent))
                 .setContentIntent(pi)
                 .setDeleteIntent(dismissPi)
                 .setAutoCancel(true)
                 .setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC);
+        if (fullScreen) {
+            // Kilit ekranında tam ekran alarm (AlarmActivity) açılır.
+            Intent full = new Intent(c, AlarmActivity.class)
+                    .putExtra(AlarmScheduler.EXTRA_PRAYER, prayer)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+            b.setFullScreenIntent(PendingIntent.getActivity(c, 300 + prayer, full,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE), true);
+        }
         if (playing) {
             b.addAction(new Notification.Action.Builder(null, "🔇 Sesi durdur", stopPi).build());
         }

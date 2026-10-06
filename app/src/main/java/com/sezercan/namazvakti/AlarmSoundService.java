@@ -21,6 +21,7 @@ public class AlarmSoundService extends Service {
     public static final String ACTION_STOP = "com.sezercan.namazvakti.SESI_DURDUR";
     /** Bildirim kaydırılıp silindi ya da açıldı: sesi durdur, bildirimi geri koyma. */
     public static final String ACTION_DISMISS = "com.sezercan.namazvakti.BILDIRIM_KAPANDI";
+    public static final String EXTRA_PREVIEW = "onizleme";
     /** Uzun bir ilahi seçilse bile en fazla bu kadar çalar. */
     private static final long MAX_MS = 5 * 60 * 1000L;
 
@@ -29,6 +30,7 @@ public class AlarmSoundService extends Service {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private MediaPlayer player;
     private int prayer = -1;
+    private boolean fullScreen;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -42,18 +44,19 @@ public class AlarmSoundService extends Service {
         }
         releasePlayer();
         prayer = intent.getIntExtra(AlarmScheduler.EXTRA_PRAYER, PrayerTimes.OGLE);
+        fullScreen = !intent.getBooleanExtra(EXTRA_PREVIEW, false);
         int id = Notifier.notificationId(prayer);
         try {
             if (Build.VERSION.SDK_INT >= 29) {
-                startForeground(id, Notifier.build(this, prayer, true),
+                startForeground(id, Notifier.build(this, prayer, true, fullScreen),
                         ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             } else {
-                startForeground(id, Notifier.build(this, prayer, true));
+                startForeground(id, Notifier.build(this, prayer, true, fullScreen));
             }
         } catch (Exception e) {
             // Sistem izin vermezse en azından telefonun alarm sesiyle bildirim göster.
             getSystemService(NotificationManager.class)
-                    .notify(id, Notifier.build(this, prayer, false, Notifier.CHANNEL_FALLBACK));
+                    .notify(id, Notifier.build(this, prayer, false, fullScreen, Notifier.CHANNEL_FALLBACK));
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -130,7 +133,7 @@ public class AlarmSoundService extends Service {
             stopForeground(keepNotification ? STOP_FOREGROUND_DETACH : STOP_FOREGROUND_REMOVE);
             if (keepNotification && prayer >= 0) {
                 getSystemService(NotificationManager.class)
-                        .notify(Notifier.notificationId(prayer), Notifier.build(this, prayer, false));
+                        .notify(Notifier.notificationId(prayer), Notifier.build(this, prayer, false, false));
             }
         }
         running = false;

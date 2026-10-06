@@ -1,9 +1,253 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:colorPrimary">#CDB8E8</item>
-        <item name="android:colorPrimaryDark">#FFF9F5</item>
-        <item name="android:colorAccent">#6B5B95</item>
-        <item name="android:windowBackground">#FFF9F5</item>
+        <item name="android:colorPrimary">@color/accent</item>
+        <item name="android:colorPrimaryDark">@color/bg</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:fontFamily">@font/nunito_regular</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
+    </style>
+
+    <style name="AlarmTheme" parent="AppTheme">
+        <item name="android:windowBackground">@color/navy_dark</item>
+        <item name="android:statusBarColor">@color/navy_dark</item>
+        <item name="android:navigationBarColor">@color/navy_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+
+    <!-- Alttan açılan pencere: tam ekran, şeffaf, animasyonsuz -->
+    <style name="SheetDialog" parent="android:Theme.Material.Light.Dialog">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:statusBarColor">@color/transparent</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <!-- ===== Yazı stilleri (Nunito) ===== -->
+    <style name="Text">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:fontFamily">@font/nunito_regular</item>
+        <item name="android:textSize">@dimen/ts_body</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+    <style name="Text.ExtraBold"><item name="android:fontFamily">@font/nunito_extrabold</item></style>
+    <style name="Text.Bold"><item name="android:fontFamily">@font/nunito_bold</item></style>
+
+    <style name="Text.Countdown" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_countdown</item>
+        <item name="android:textColor">@color/header_text</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+    <style name="Text.LockClock" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_lock_clock</item>
+        <item name="android:textColor">@color/header_text</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+    <style name="Text.TextDetailTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_text_detail_title</item></style>
+    <style name="Text.PrayerTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_prayer_title</item></style>
+    <style name="Text.RowTime" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_row_time</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+    <style name="Text.AppTitle" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_app_title</item>
+        <item name="android:textColor">@color/header_text</item>
+    </style>
+    <style name="Text.CategoryTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_category_title</item></style>
+    <style name="Text.SheetTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_sheet_title</item></style>
+    <style name="Text.CardTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_card_title</item></style>
+    <style name="Text.TopBar" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_top_bar</item></style>
+    <style name="Text.StepTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_step_title</item></style>
+    <style name="Text.TableName" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_table_name</item></style>
+    <style name="Text.TableCount" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_table_count</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="Text.NotifTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_notif_title</item></style>
+    <style name="Text.ListRow" parent="Text.Bold"><item name="android:textSize">@dimen/ts_list_row</item></style>
+    <style name="Text.Reading" parent="Text">
+        <item name="android:textSize">@dimen/ts_reading</item>
+        <item name="android:lineSpacingMultiplier">1.55</item>
+    </style>
+    <style name="Text.Date" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_date</item>
+        <item name="android:textColor">@color/header_text</item>
+    </style>
+    <style name="Text.Summary" parent="Text.Bold"><item name="android:textSize">@dimen/ts_date</item></style>
+    <style name="Text.Niyet" parent="Text">
+        <item name="android:textSize">@dimen/ts_niyet</item>
+        <item name="android:lineSpacingMultiplier">1.45</item>
+    </style>
+    <style name="Text.Body" parent="Text">
+        <item name="android:textSize">@dimen/ts_body</item>
+        <item name="android:lineSpacingMultiplier">1.45</item>
+    </style>
+    <style name="Text.Label" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_label</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="Text.HeaderLabel" parent="Text.Label"><item name="android:textColor">@color/header_label</item></style>
+    <style name="Text.Hijri" parent="Text">
+        <item name="android:textSize">@dimen/ts_hijri</item>
+        <item name="android:textColor">@color/header_text_secondary</item>
+    </style>
+    <style name="Text.Subtitle" parent="Text">
+        <item name="android:textSize">@dimen/ts_hijri</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Text.Small" parent="Text">
+        <item name="android:textSize">@dimen/ts_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Text.SmallBold" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_small</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Text.Badge" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_badge</item>
+        <item name="android:textColor">@color/header_text</item>
+        <item name="android:paddingStart">@dimen/badge_pad_h</item>
+        <item name="android:paddingEnd">@dimen/badge_pad_h</item>
+        <item name="android:paddingTop">@dimen/badge_pad_v</item>
+        <item name="android:paddingBottom">@dimen/badge_pad_v</item>
+    </style>
+    <style name="Text.Chevron" parent="Text">
+        <item name="android:textSize">@dimen/ts_chevron</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+    <style name="Text.ChevronLarge" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_chevron_large</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="Text.NumLarge" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_num_large</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="Text.NumMedium" parent="Text.NumLarge"><item name="android:textSize">@dimen/ts_num_medium</item></style>
+    <style name="Text.NumSmall" parent="Text.NumLarge"><item name="android:textSize">@dimen/ts_num_small</item></style>
+
+    <!-- Arapça (Amiri) -->
+    <style name="Text.Arabic" parent="Text">
+        <item name="android:fontFamily">@font/amiri_regular</item>
+        <item name="android:textSize">@dimen/ts_arabic</item>
+        <item name="android:lineSpacingMultiplier">2.1</item>
+        <item name="android:textDirection">rtl</item>
+        <item name="android:layoutDirection">rtl</item>
+        <item name="android:gravity">end</item>
+        <item name="android:includeFontPadding">true</item>
+        <item name="android:textIsSelectable">true</item>
+    </style>
+    <style name="Text.Besmele" parent="Text.Arabic">
+        <item name="android:textSize">@dimen/ts_besmele</item>
+        <item name="android:lineSpacingMultiplier">1.9</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- ===== Düğmeler ===== -->
+    <style name="Btn">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">@font/nunito_extrabold</item>
+        <item name="android:textSize">@dimen/ts_button</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:paddingStart">@dimen/button_pad_h</item>
+        <item name="android:paddingEnd">@dimen/button_pad_h</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:elevation">0dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="Btn.Primary">
+        <item name="android:background">@drawable/btn_primary</item>
+        <item name="android:textColor">@color/header_text</item>
+    </style>
+    <style name="Btn.Secondary">
+        <item name="android:background">@drawable/btn_secondary</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+    <style name="Btn.Primary.Small">
+        <item name="android:minHeight">@dimen/button_height_warning</item>
+        <item name="android:textSize">@dimen/ts_button_small</item>
+    </style>
+    <style name="Btn.Primary.Sheet">
+        <item name="android:textSize">@dimen/ts_button_small</item>
+    </style>
+    <style name="Btn.Secondary.Sheet">
+        <item name="android:textSize">@dimen/ts_button_small</item>
+    </style>
+    <style name="Btn.Back" parent="Btn">
+        <item name="android:minHeight">@dimen/back_button</item>
+        <item name="android:minWidth">@dimen/back_button</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:textSize">@dimen/ts_back</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:background">@drawable/btn_icon</item>
+    </style>
+
+    <!-- Ayar satırı ("Alarm sesi: …  ›") -->
+    <style name="SettingRow">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:background">@drawable/setting_row</item>
+        <item name="android:paddingStart">@dimen/pad_card</item>
+        <item name="android:paddingEnd">@dimen/pad_card</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="Text.SettingRow" parent="Text.ExtraBold">
+        <item name="android:textSize">@dimen/ts_button</item>
+    </style>
+
+    <!-- Anahtar -->
+    <style name="VakitSwitch">
+        <item name="android:thumb">@drawable/switch_thumb</item>
+        <item name="android:track">@drawable/switch_track</item>
+        <item name="android:switchMinWidth">@dimen/switch_track_w</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+        <item name="android:minWidth">@dimen/switch_touch_w</item>
+        <item name="android:gravity">center</item>
+        <item name="android:showText">false</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <!-- Açılır menü (zemin ve boşluklar MainActivity.spinner() içinde kaynaklardan verilir) -->
+    <style name="Text.SpinnerItem" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_list_row</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">@dimen/spinner_height</item>
+        <item name="android:paddingEnd">@dimen/touch_min</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:ellipsize">end</item>
+    </style>
+    <style name="Text.SpinnerDropdown" parent="Text.SpinnerItem">
+        <item name="android:paddingStart">@dimen/pad_card</item>
+        <item name="android:paddingEnd">@dimen/pad_card</item>
+        <item name="android:minHeight">@dimen/touch_min</item>
+    </style>
+
+    <!-- Alarm sesi radyo satırı -->
+    <style name="SoundRadio" parent="Text.ListRow">
+        <item name="android:button">@drawable/radio</item>
+        <item name="android:background">@drawable/radio_row_bg</item>
+        <item name="android:minHeight">@dimen/sound_row_min</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">@dimen/radio_row_pad</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
 </resources>

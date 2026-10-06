@@ -41,6 +41,30 @@ public class SmokeTest {
     }
 
     @Test
+    public void alarmScreenAndSheetsOpen() {
+        Robolectric.buildActivity(AlarmActivity.class,
+                new Intent().putExtra(AlarmScheduler.EXTRA_PRAYER, 2)).setup();
+        MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
+        clickAll(main.getWindow().getDecorView(), "Alarm sesi");
+        clickAll(main.getWindow().getDecorView(), "Alarmı dene");
+    }
+
+    /** Metni içeren tıklanabilir görünüme dokunur. */
+    static void clickAll(android.view.View v, String text) {
+        if (v instanceof android.widget.TextView
+                && ((android.widget.TextView) v).getText().toString().contains(text)) {
+            android.view.View t = v;
+            while (t != null && !t.isClickable()) t = (android.view.View) t.getParent();
+            if (t != null) t.performClick();
+            return;
+        }
+        if (v instanceof android.view.ViewGroup) {
+            android.view.ViewGroup g = (android.view.ViewGroup) v;
+            for (int i = 0; i < g.getChildCount(); i++) clickAll(g.getChildAt(i), text);
+        }
+    }
+
+    @Test
     public void alarmFlowWorks() {
         android.content.Context c = org.robolectric.RuntimeEnvironment.getApplication();
         AlarmScheduler.scheduleNext(c);
