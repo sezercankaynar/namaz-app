@@ -15,30 +15,63 @@ import java.util.Calendar;
 public final class Notifier {
     private Notifier() {}
 
-    static final String CHANNEL = "vakit_alarmi";
+    /** Ana kanal: sesi uygulama kendisi çalar (seçilen zil/ilahi), kanal sadece titreşir. */
+    static final String CHANNEL = "vakit_v2";
+    /** Yedek kanal: ses servisi başlatılamazsa telefonun alarm sesiyle bildirim. */
+    static final String CHANNEL_FALLBACK = "vakit_yedek";
+
+    static int notificationId(int prayer) {
+        return 100 + prayer;
+    }
 
     public static void ensureChannel(Context c) {
         NotificationManager nm = c.getSystemService(NotificationManager.class);
-        if (nm.getNotificationChannel(CHANNEL) != null) return;
-        NotificationChannel ch = new NotificationChannel(CHANNEL, "Namaz vakti alarmı",
-                NotificationManager.IMPORTANCE_HIGH);
-        ch.setDescription("Namaz vakti girdiğinde çalan uyarı");
-        Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        if (sound == null) sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        ch.setSound(sound, new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build());
-        ch.enableVibration(true);
-        ch.setVibrationPattern(new long[]{0, 800, 400, 800, 400, 800});
-        ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        ch.setBypassDnd(true);
-        nm.createNotificationChannel(ch);
+        nm.deleteNotificationChannel("vakit_alarmi"); // ilk sürümün kanalı
+        if (nm.getNotificationChannel(CHANNEL) == null) {
+            NotificationChannel ch = new NotificationChannel(CHANNEL, "Namaz vakti alarmı",
+                    NotificationManager.IMPORTANCE_HIGH);
+            ch.setDescription("Namaz vakti girdiğinde gösterilen uyarı (sesi uygulama ayarlarından seçilir)");
+            ch.setSound(null, null);
+            ch.enableVibration(true);
+            ch.setVibrationPattern(new long[]{0, 700, 400, 700, 400, 700});
+            ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            ch.setBypassDnd(true);
+            nm.createNotificationChannel(ch);
+        }
+        if (nm.getNotificationChannel(CHANNEL_FALLBACK) == null) {
+            NotificationChannel ch = new NotificationChannel(CHANNEL_FALLBACK, "Namaz vakti (yedek)",
+                    NotificationManager.IMPORTANCE_HIGH);
+            Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            if (sound == null) sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            ch.setSound(sound, new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build());
+            ch.enableVibration(true);
+            ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            nm.createNotificationChannel(ch);
+        }
     }
 
-    public static void show(Context c, int prayer) {
+    /** Vakit alarmını başlatır: sesi çalan servisi açar; olmazsa sesli yedek bildirim gösterir. */
+    public static void alarm(Context c, int prayer) {
         ensureChannel(c);
-        boolean friday = Calendar.getInstance().get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
+        Intent svc = new Intent(c, AlarmSoundService.class);
+        svc.putExtra(AlarmScheduler.EXTRA_PRAYER, prayer);
+        try {
+            c.startForegroundService(svc);
+        } catch (Exception e) {
+            c.getSystemService(NotificationManager.class)
+                    .notify(notificationId(prayer), build(c, prayer, false, CHANNEL_FALLBACK));
+        }
+    }
+
+    static Notification build(Context c, int prayer, boolean playing) {
+        return build(c, prayer, playing, CHANNEL);
+    }
+
+    static Notification build(Context c, int prayer, boolean playing, String channel) {
+        boolean friday = Times.today().get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY;
         PrayerInfo info = PrayerInfo.forPrayer(prayer, friday);
 
         Intent open = new Intent(c, PrayerDetailActivity.class);
@@ -47,20 +80,30 @@ public final class Notifier {
         PendingIntent pi = PendingIntent.getActivity(c, 100 + prayer, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        String title = info.alarmTitle;
-        String text = info.summary + "\nNasıl kılındığını görmek için dokunun.";
+        Intent stop = new Intent(c, AlarmSoundService.class).setAction(AlarmSoundService.ACTION_STOP);
+        PendingIntent stopPi = PendingIntent.getService(c, 200, stop,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        Notification n = new Notification.Builder(c, CHANNEL)
+        Intent dismiss = new Intent(c, AlarmSoundService.class).setAction(AlarmSoundService.ACTION_DISMISS);
+        PendingIntent dismissPi = PendingIntent.getService(c, 201, dismiss,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        String text = info.summary + "\nNasıl kılındığını görmek için dokunun.";
+        Notification.Builder b = new Notification.Builder(c, channel)
                 .setSmallIcon(R.drawable.ic_stat_moon)
-                .setContentTitle(title)
+                .setContentTitle(info.alarmTitle)
                 .setContentText(info.summary)
                 .setStyle(new Notification.BigTextStyle().bigText(text))
                 .setCategory(Notification.CATEGORY_ALARM)
-                .setColor(0xFF1B5E20)
+                .setColor(Ui.PLUM)
                 .setContentIntent(pi)
+                .setDeleteIntent(dismissPi)
                 .setAutoCancel(true)
-                .setVisibility(Notification.VISIBILITY_PUBLIC)
-                .build();
-        c.getSystemService(NotificationManager.class).notify(prayer, n);
+                .setOnlyAlertOnce(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC);
+        if (playing) {
+            b.addAction(new Notification.Action.Builder(null, "🔇 Sesi durdur", stopPi).build());
+        }
+        return b.build();
     }
 }

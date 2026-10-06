@@ -18,9 +18,9 @@ public final class AlarmScheduler {
 
     /** {vakit, zaman} veya hiçbir alarm açık değilse null. */
     public static long[] findNext(Context c, long after) {
-        Calendar day = Calendar.getInstance();
+        Calendar day = Times.today();
         for (int offset = 0; offset < 3; offset++) {
-            long[] times = Prefs.todayTimes(c, day);
+            long[] times = Times.forDay(c, day);
             for (int p = 0; p < PrayerTimes.COUNT; p++) {
                 if (times[p] > after && Prefs.alarmOn(c, p)) return new long[]{p, times[p]};
             }
@@ -53,18 +53,22 @@ public final class AlarmScheduler {
         am.setAlarmClock(new AlarmManager.AlarmClockInfo(next[1], show), pi);
     }
 
-    /** "Alarmı dene" düğmesi: 1 dakika sonra gerçek alarm yoluyla bildirim gösterir. */
-    public static void scheduleTest(Context c) {
-        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
-        long at = System.currentTimeMillis() + 60_000;
-        Calendar now = Calendar.getInstance();
-        long[] times = Prefs.todayTimes(c, now);
+    /** Şu anki vakit (en son giren namaz vakti); deneme alarmında kullanılır. */
+    public static int currentPrayer(Context c, long at) {
+        long[] times = Times.forDay(c, Times.today());
         int prayer = PrayerTimes.YATSI;
         for (int p = 0; p < PrayerTimes.COUNT; p++) {
             if (p != PrayerTimes.GUNES && times[p] <= at) prayer = p;
         }
+        return prayer;
+    }
+
+    /** "1 dakika sonra" denemesi: gerçek alarm yoluyla çalar. */
+    public static void scheduleTest(Context c) {
+        AlarmManager am = (AlarmManager) c.getSystemService(Context.ALARM_SERVICE);
+        long at = System.currentTimeMillis() + 60_000;
         Intent i = new Intent(c, AlarmReceiver.class);
-        i.putExtra(EXTRA_PRAYER, prayer);
+        i.putExtra(EXTRA_PRAYER, currentPrayer(c, at));
         i.putExtra(EXTRA_TIME, at);
         i.putExtra(EXTRA_TEST, true);
         PendingIntent pi = PendingIntent.getBroadcast(c, 2, i,

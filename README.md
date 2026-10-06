@@ -3,8 +3,14 @@
 Namaz vakitlerinde alarm gibi uyarı veren, bildirime dokununca o vaktin
 kaç rekât olduğunu ve kısaca nasıl kılındığını gösteren basit bir uygulama.
 
-- Vakitler Diyanet yöntemiyle telefonda hesaplanır (internet gerekmez).
-- 81 il seçilebilir.
+- Vakitler Diyanet'in ilçe bazındaki resmi vakitlerinden alınır (30 gün saklanır);
+  internet yoksa Diyanet yöntemiyle telefonda hesaplanır.
+- 81 il ve 869 ilçe seçilebilir; saniye saniye geri sayım, hicri tarih.
+- Alarm sesi: uygulamanın "Huzur zili", telefonun alarm sesi, telefondan seçilen
+  bir ses dosyası (ör. ilahi) ya da sadece titreşim.
+- Dualar ve Sûreler: Namaz duaları, Fâtiha, kısa sûreler, âyetler ve tesbihat;
+  her biri Arapça yazılış, okunuş ve anlamıyla.
+- Pastel renkli arayüz.
 - Her vakit için alarm ayrı ayrı açılıp kapatılabilir (Güneş varsayılan kapalı).
 - Cuma günü öğle bildirimi Cuma namazı bilgisini gösterir.
 - "Namaz nasıl kılınır? / Dualar" ekranında temel hareketler ve dualar var.

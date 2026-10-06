@@ -144,18 +144,4 @@ public final class PrayerInfo {
         {"Oturuş (ka'de)", "Her iki rekâtın sonunda oturulur. Ara oturuşta Ettehiyyâtü, son oturuşta Ettehiyyâtü, Salli, Bârik ve Rabbenâ okunur."},
         {"Selam", "Başını önce sağa “Esselâmü aleyküm ve rahmetullâh”, sonra sola aynı şekilde çevir. Namaz bitti."},
     };
-
-    public static final String[][] DUALAR = {
-        {"Sübhâneke", "Sübhânekellâhümme ve bi hamdik ve tebârekesmük ve teâlâ ceddük ve lâ ilâhe ğayruk."},
-        {"Eûzü-Besmele", "Eûzü billâhi mine'ş-şeytâni'r-racîm. Bismillâhi'r-rahmâni'r-rahîm."},
-        {"Fâtiha", "Elhamdü lillâhi rabbi'l-âlemîn. Errahmâni'r-rahîm. Mâliki yevmi'd-dîn. İyyâke na'büdü ve iyyâke neste'în. İhdina's-sırâta'l-müstakîm. Sırâta'llezîne en'amte aleyhim ğayri'l-mağdûbi aleyhim ve le'd-dâllîn. (Âmîn)"},
-        {"Kısa sûre örneği: İhlâs", "Kul hüvallâhü ehad. Allâhü's-samed. Lem yelid ve lem yûled. Ve lem yekün lehû küfüven ehad."},
-        {"Kısa sûre örneği: Kevser", "İnnâ a'taynâke'l-kevser. Fe salli li rabbike ve'nhar. İnne şânieke hüve'l-ebter."},
-        {"Ettehiyyâtü", "Ettehiyyâtü lillâhi ve's-salavâtü ve't-tayyibât. Esselâmü aleyke eyyühe'n-nebiyyü ve rahmetullâhi ve berakâtüh. Esselâmü aleynâ ve alâ ibâdillâhi's-sâlihîn. Eşhedü en lâ ilâhe illallâh ve eşhedü enne Muhammeden abdühû ve rasûlüh."},
-        {"Allâhümme Salli", "Allâhümme salli alâ Muhammedin ve alâ âli Muhammed, kemâ salleyte alâ İbrâhîme ve alâ âli İbrâhîm, inneke hamîdün mecîd."},
-        {"Allâhümme Bârik", "Allâhümme bârik alâ Muhammedin ve alâ âli Muhammed, kemâ bârekte alâ İbrâhîme ve alâ âli İbrâhîm, inneke hamîdün mecîd."},
-        {"Rabbenâ", "Rabbenâ âtinâ fi'd-dünyâ haseneten ve fi'l-âhireti haseneten ve kınâ azâbe'n-nâr. Rabbenağfirlî ve li-vâlideyye ve li'l-mü'minîne yevme yekûmü'l-hisâb."},
-        {"Kunut 1 (vitirde)", "Allâhümme innâ nesteînüke ve nestağfirüke ve nestehdîk. Ve nü'minü bike ve netûbü ileyk. Ve netevekkelü aleyke ve nüsnî aleyke'l-hayra küllehû neşkürüke ve lâ nekfürüke ve nahleu ve netrükü men yefcürük."},
-        {"Kunut 2 (vitirde)", "Allâhümme iyyâke na'büdü ve leke nüsallî ve nescüdü ve ileyke nes'â ve nahfidü nercû rahmeteke ve nahşâ azâbeke inne azâbeke bi'l-küffâri mülhık."},
-    };
 }
