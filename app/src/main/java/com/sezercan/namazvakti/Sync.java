@@ -29,7 +29,10 @@ import java.util.UUID;
 public final class Sync {
     private Sync() {}
 
-    private static final String SERVER = "https://ntfy.sh/";
+    /** Paylaşım sunucusu (testlerde değiştirilir). */
+    static String server = "https://ntfy.sh/";
+    /** Bu kadar gündür güncellenmeyen arkadaş gösterilmez. */
+    private static final long STALE_MS = 14L * 24 * 60 * 60 * 1000;
     private static final String CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     public static final int CODE_LEN = 8;
     /** Uygulama açılışında en fazla bu sıklıkla yeniden gönderilir. */
@@ -141,6 +144,20 @@ public final class Sync {
         }
     }
 
+    /** Ham liste (test için): eski ve yinelenen kayıtlar dahil. */
+    static List<Friend> friendsIncludingStale(Context c) {
+        List<Friend> out = new ArrayList<>();
+        try {
+            JSONObject all = new JSONObject(sp(c).getString("arkadaslar", "{}"));
+            Iterator<String> it = all.keys();
+            while (it.hasNext()) {
+                String id = it.next();
+                out.add(new Friend(id, all.getJSONObject(id)));
+            }
+        } catch (Exception ignored) {}
+        return out;
+    }
+
     public static List<Friend> friends(Context c) {
         List<Friend> out = new ArrayList<>();
         try {
@@ -151,6 +168,17 @@ public final class Sync {
                 out.add(new Friend(id, all.getJSONObject(id)));
             }
         } catch (Exception ignored) {}
+        // Uygulamayı silip yeniden kuran arkadaş yeni bir kimlikle gelir: aynı isimden yalnızca
+        // en yenisini göster; uzun süredir güncellenmeyenleri gizle.
+        java.util.Map<String, Friend> byName = new java.util.HashMap<>();
+        long now = System.currentTimeMillis();
+        for (Friend f : out) {
+            if (now - f.updated > STALE_MS) continue;
+            String key = f.name.trim().toLowerCase(new java.util.Locale("tr", "TR"));
+            Friend old = byName.get(key);
+            if (old == null || old.updated < f.updated) byName.put(key, f);
+        }
+        out = new ArrayList<>(byName.values());
         out.sort((a, b) -> a.name.compareToIgnoreCase(b.name));
         return out;
     }
@@ -197,7 +225,7 @@ public final class Sync {
         if (code == null) return false;
         HttpURLConnection con = null;
         try {
-            con = (HttpURLConnection) new URL(SERVER + topic(code)).openConnection();
+            con = (HttpURLConnection) new URL(server + topic(code)).openConnection();
             con.setConnectTimeout(15000);
             con.setReadTimeout(15000);
             con.setRequestMethod("POST");
@@ -221,7 +249,7 @@ public final class Sync {
         if (code == null) return false;
         HttpURLConnection con = null;
         try {
-            con = (HttpURLConnection) new URL(SERVER + topic(code) + "/json?poll=1&since=12h").openConnection();
+            con = (HttpURLConnection) new URL(server + topic(code) + "/json?poll=1&since=12h").openConnection();
             con.setConnectTimeout(15000);
             con.setReadTimeout(20000);
             if (con.getResponseCode() != 200) return false;

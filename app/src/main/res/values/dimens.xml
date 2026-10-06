@@ -2,11 +2,11 @@
 <resources>
     <!-- Yazı boyutları -->
     <dimen name="ts_countdown">48sp</dimen>
+    <dimen name="ts_countdown_main">40sp</dimen>
     <dimen name="ts_lock_clock">76sp</dimen>
     <dimen name="ts_text_detail_title">30sp</dimen>
     <dimen name="ts_prayer_title">28sp</dimen>
     <dimen name="ts_row_time">24sp</dimen>
-    <dimen name="ts_app_title">22sp</dimen>
     <dimen name="ts_category_title">21sp</dimen>
     <dimen name="ts_sheet_title">21sp</dimen>
     <dimen name="ts_card_title">20sp</dimen>
@@ -25,7 +25,6 @@
     <dimen name="ts_label">15sp</dimen>
     <dimen name="ts_hijri">15sp</dimen>
     <dimen name="ts_small">14sp</dimen>
-    <dimen name="ts_badge">12sp</dimen>
     <dimen name="ts_arabic">30sp</dimen>
     <dimen name="ts_besmele">26sp</dimen>
     <dimen name="ts_chevron">24sp</dimen>
@@ -44,11 +43,9 @@
     <dimen name="gap_category">12dp</dimen>
     <dimen name="gap_row">10dp</dimen>
     <dimen name="gap_list">8dp</dimen>
-    <dimen name="pad_header">20dp</dimen>
     <dimen name="pad_detail">18dp</dimen>
     <dimen name="pad_card">16dp</dimen>
     <dimen name="row_pad_v">14dp</dimen>
-    <dimen name="row_pad_end">14dp</dimen>
     <dimen name="row_pad_start">16dp</dimen>
     <dimen name="col_gap">12dp</dimen>
     <dimen name="item_gap_detail">10dp</dimen>
@@ -59,8 +56,6 @@
     <dimen name="cat_pad_v">18dp</dimen>
     <dimen name="cat_pad_h">20dp</dimen>
     <dimen name="spinner_pad_h">10dp</dimen>
-    <dimen name="badge_pad_h">8dp</dimen>
-    <dimen name="badge_pad_v">2dp</dimen>
     <dimen name="sheet_pad_top">12dp</dimen>
     <dimen name="sheet_pad_bottom">24dp</dimen>
     <dimen name="radio_row_pad">12dp</dimen>
@@ -70,7 +65,6 @@
     <dimen name="radius_spinner">12dp</dimen>
     <dimen name="radius_notification">20dp</dimen>
     <dimen name="radius_sheet">24dp</dimen>
-    <dimen name="radius_badge">8dp</dimen>
 
     <!-- Bileşen ölçüleri -->
     <dimen name="button_height">58dp</dimen>
@@ -101,6 +95,18 @@
     <dimen name="switch_thumb_inset">3dp</dimen>
     <dimen name="radio_ring_stroke">2dp</dimen>
     <dimen name="spinner_chevron">20dp</dimen>
+
+    <!-- Tek sayfa ana ekran -->
+    <dimen name="row_compact_h">48dp</dimen>
+    <dimen name="gap_compact">6dp</dimen>
+    <dimen name="pill_slot_w">96dp</dimen>
+    <dimen name="tab_bar_h">64dp</dimen>
+    <dimen name="ts_tab_icon">20sp</dimen>
+    <dimen name="ts_tab">14sp</dimen>
+    <dimen name="ts_verse_compact">16sp</dimen>
+    <dimen name="ts_row_name">18sp</dimen>
+    <dimen name="badge_dot">8dp</dimen>
+    <dimen name="main_bottom_compact">8dp</dimen>
 
     <!-- Haftalık takip -->
     <dimen name="week_dot">10dp</dimen>

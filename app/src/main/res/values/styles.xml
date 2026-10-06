@@ -59,10 +59,6 @@
         <item name="android:textSize">@dimen/ts_row_time</item>
         <item name="android:fontFeatureSettings">tnum</item>
     </style>
-    <style name="Text.AppTitle" parent="Text.ExtraBold">
-        <item name="android:textSize">@dimen/ts_app_title</item>
-        <item name="android:textColor">@color/header_text</item>
-    </style>
     <style name="Text.CategoryTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_category_title</item></style>
     <style name="Text.SheetTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_sheet_title</item></style>
     <style name="Text.CardTitle" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_card_title</item></style>
@@ -112,14 +108,6 @@
     <style name="Text.SmallBold" parent="Text.Bold">
         <item name="android:textSize">@dimen/ts_small</item>
         <item name="android:textColor">@color/text_secondary</item>
-    </style>
-    <style name="Text.Badge" parent="Text.ExtraBold">
-        <item name="android:textSize">@dimen/ts_badge</item>
-        <item name="android:textColor">@color/header_text</item>
-        <item name="android:paddingStart">@dimen/badge_pad_h</item>
-        <item name="android:paddingEnd">@dimen/badge_pad_h</item>
-        <item name="android:paddingTop">@dimen/badge_pad_v</item>
-        <item name="android:paddingBottom">@dimen/badge_pad_v</item>
     </style>
     <style name="Text.Chevron" parent="Text">
         <item name="android:textSize">@dimen/ts_chevron</item>
@@ -172,6 +160,27 @@
     <style name="Text.Poet" parent="Text.ExtraBold">
         <item name="android:textSize">@dimen/ts_body</item>
         <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <!-- Tek sayfa ana ekran -->
+    <style name="Text.VerseCompact" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_verse_compact</item>
+        <item name="android:lineSpacingMultiplier">1.3</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textDirection">firstStrong</item>
+    </style>
+    <style name="Text.CountdownMain" parent="Text.Countdown">
+        <item name="android:textSize">@dimen/ts_countdown_main</item>
+    </style>
+    <style name="Text.RowName" parent="Text.ExtraBold"><item name="android:textSize">@dimen/ts_row_name</item></style>
+    <style name="Text.TabIcon" parent="Text">
+        <item name="android:textSize">@dimen/ts_tab_icon</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="Text.Tab" parent="Text.Bold">
+        <item name="android:textSize">@dimen/ts_tab</item>
+        <item name="android:gravity">center</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <!-- Arapça (Amiri) -->

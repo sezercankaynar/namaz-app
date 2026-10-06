@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Yüksekliği 720dp ve üzeri ekranlarda ana ekran tasarımdaki tam ölçülerle -->
+    <dimen name="row_compact_h">52dp</dimen>
+    <dimen name="gap_compact">8dp</dimen>
+    <dimen name="ts_countdown_main">48sp</dimen>
+</resources>

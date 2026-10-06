@@ -13,6 +13,12 @@ import org.robolectric.annotation.Config;
 @Config(sdk = {26, 29, 30, 33, 34, 35})
 public class SmokeTest {
 
+    @org.junit.Before
+    public void offline() {
+        Sync.server = "http://127.0.0.1:9/";
+    }
+
+
     @Test
     public void mainScreenOpens() {
         Robolectric.buildActivity(MainActivity.class).setup();
@@ -45,9 +51,12 @@ public class SmokeTest {
         Robolectric.buildActivity(AlarmActivity.class,
                 new Intent().putExtra(AlarmScheduler.EXTRA_PRAYER, 2)).setup();
         MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
-        clickAll(main.getWindow().getDecorView(), "Alarm sesi");
-        clickAll(main.getWindow().getDecorView(), "Alarmı dene");
-        clickAll(main.getWindow().getDecorView(), "Arkadaşınla eşleş");
+        clickAll(main.getWindow().getDecorView(), "Günün mısrası");
+        SettingsActivity set = Robolectric.buildActivity(SettingsActivity.class).setup().get();
+        clickAll(set.getWindow().getDecorView(), "Alarm sesi:");
+        clickAll(set.getWindow().getDecorView(), "Alarmı dene");
+        TrackActivity track = Robolectric.buildActivity(TrackActivity.class).setup().get();
+        clickAll(track.getWindow().getDecorView(), "Arkadaşınla eşleş");
     }
 
     /** Metni içeren tıklanabilir görünüme dokunur. */

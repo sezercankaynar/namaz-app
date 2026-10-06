@@ -52,6 +52,9 @@
     <color name="card_meaning">#BBD9F2</color>
     <color name="step_circle">#D2C2EE</color>
 
+    <!-- Menü işareti (eksik izin) -->
+    <color name="badge_dot">#E0685A</color>
+
     <!-- Günün mısrası -->
     <color name="poem_bg">#ECEEF7</color>
 

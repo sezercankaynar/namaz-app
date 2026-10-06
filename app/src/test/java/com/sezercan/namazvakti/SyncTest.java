@@ -17,6 +17,12 @@ import java.util.Arrays;
 @Config(sdk = 34)
 public class SyncTest {
 
+    @org.junit.Before
+    public void offline() {
+        Sync.server = "http://127.0.0.1:9/";
+    }
+
+
     private final Context c = RuntimeEnvironment.getApplication();
 
     @Test
@@ -58,14 +64,21 @@ public class SyncTest {
         int changed = Sync.mergeLines(c, Arrays.asList(
                 ev(friendOld), ev(mine), ev(friendNew), "{\"event\":\"open\"}", "", ev("bozuk{")));
         assertEquals(2, changed);
-        assertEquals(1, Sync.friends(c).size());
-        Sync.Friend f = Sync.friends(c).get(0);
+        Sync.Friend f = Sync.friendsIncludingStale(c).get(0);
         assertEquals("Ahmet", f.name);
         assertEquals(200, f.updated);
         assertEquals(37, f.mask(today));
         // Daha eski bir mesaj sonradan gelse de yenisini ezmez.
         Sync.mergeLines(c, Arrays.asList(ev(friendOld)));
-        assertEquals(37, Sync.friends(c).get(0).mask(today));
+        assertEquals(37, Sync.friendsIncludingStale(c).get(0).mask(today));
+
+        // Yeniden kurulum: aynı isim, yeni kimlik → tek kişi, yenisi gösterilir.
+        long now = System.currentTimeMillis();
+        String reinstalled = "{\"v\":1,\"id\":\"f2\",\"ad\":\"ahmet\",\"t\":" + now + ",\"g\":{\"" + today + "\":4}}";
+        String stale = "{\"v\":1,\"id\":\"f3\",\"ad\":\"Eski\",\"t\":1000,\"g\":{}}";
+        Sync.mergeLines(c, Arrays.asList(ev(reinstalled), ev(stale)));
+        assertEquals(1, Sync.friends(c).size());
+        assertEquals(4, Sync.friends(c).get(0).mask(today));
 
         Sync.unpair(c);
         assertFalse(Sync.paired(c));

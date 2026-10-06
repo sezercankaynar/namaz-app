@@ -24,6 +24,12 @@ import java.io.FileOutputStream;
 @Config(sdk = 34, qualifiers = "w360dp-h800dp-xxhdpi")
 public class ScreenshotTest {
 
+    @org.junit.Before
+    public void offline() {
+        Sync.server = "http://127.0.0.1:9/";
+    }
+
+
     private static final File OUT = new File("build/ekranlar");
 
     static void save(View v, String name) throws Exception {
@@ -76,7 +82,27 @@ public class ScreenshotTest {
     @Test
     public void screens() throws Exception {
         seedWeek();
-        save(content(Robolectric.buildActivity(MainActivity.class).setup().get()), "1_ana_ekran");
+        // Ana ekran kaydırmasız: gerçek ekran boyutunda (360×800dp) çizilir.
+        Activity mainAct = Robolectric.buildActivity(MainActivity.class).setup().get();
+        View mv = mainAct.getWindow().getDecorView();
+        mv.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY));
+        mv.layout(0, 0, 1080, 2400);
+        mv.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY));
+        mv.layout(0, 0, 1080, 2400);
+        org.robolectric.shadows.ShadowLooper.idleMainLooper();
+        mv.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(2400, View.MeasureSpec.EXACTLY));
+        mv.layout(0, 0, 1080, 2400);
+        Bitmap mb = Bitmap.createBitmap(1080, 2400, Bitmap.Config.ARGB_8888);
+        mv.draw(new Canvas(mb));
+        OUT.mkdirs();
+        try (FileOutputStream out = new FileOutputStream(new File(OUT, "1_ana_ekran.png"))) {
+            mb.compress(Bitmap.CompressFormat.PNG, 100, out);
+        }
+        save(content(Robolectric.buildActivity(SettingsActivity.class).setup().get()), "1b_ayarlar");
+        save(content(Robolectric.buildActivity(TrackActivity.class).setup().get()), "1c_takip");
         save(content(Robolectric.buildActivity(PrayerDetailActivity.class,
                 new Intent().putExtra(PrayerDetailActivity.EXTRA_KEY, "ogle")).setup().get()), "2_ogle_detay");
         save(content(Robolectric.buildActivity(PrayerDetailActivity.class,
@@ -104,14 +130,18 @@ public class ScreenshotTest {
             b.compress(Bitmap.CompressFormat.PNG, 100, out);
         }
 
-        MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
-        SmokeTest.clickAll(main.getWindow().getDecorView(), "👥 Kod:");
+        TrackActivity track = Robolectric.buildActivity(TrackActivity.class).setup().get();
+        SmokeTest.clickAll(track.getWindow().getDecorView(), "👥 Kod:");
         sheetShot(ShadowDialog.getLatestDialog(), "9_eslesme_kodu");
         Sync.unpair(org.robolectric.RuntimeEnvironment.getApplication());
-        main = Robolectric.buildActivity(MainActivity.class).setup().get();
-        SmokeTest.clickAll(main.getWindow().getDecorView(), "Arkadaşınla eşleş");
+        track = Robolectric.buildActivity(TrackActivity.class).setup().get();
+        SmokeTest.clickAll(track.getWindow().getDecorView(), "Arkadaşınla eşleş");
         sheetShot(ShadowDialog.getLatestDialog(), "9b_eslesme");
-        SmokeTest.clickAll(main.getWindow().getDecorView(), "Alarm sesi");
+        MainActivity main = Robolectric.buildActivity(MainActivity.class).setup().get();
+        SmokeTest.clickAll(main.getWindow().getDecorView(), "Günün mısrası");
+        sheetShot(ShadowDialog.getLatestDialog(), "9c_misra");
+        SettingsActivity set = Robolectric.buildActivity(SettingsActivity.class).setup().get();
+        SmokeTest.clickAll(set.getWindow().getDecorView(), "Alarm sesi:");
         Dialog d = ShadowDialog.getLatestDialog();
         View dv = d.getWindow().getDecorView();
         dv.measure(View.MeasureSpec.makeMeasureSpec(1080, View.MeasureSpec.EXACTLY),
