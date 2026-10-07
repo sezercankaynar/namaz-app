@@ -268,6 +268,9 @@
         <item name="android:gravity">center</item>
         <item name="android:showText">false</item>
         <item name="android:background">@null</item>
+        <!-- Varsayılan Switch stili kullanılmadığı için dokunmayı açıkça etkinleştir. -->
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
     </style>
 
     <!-- Açılır menü (zemin ve boşluklar MainActivity.spinner() içinde kaynaklardan verilir) -->
