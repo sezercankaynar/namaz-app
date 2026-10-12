@@ -18,7 +18,7 @@ public final class Notifier {
     /** Ana kanal: sesi uygulama kendisi çalar (seçilen zil/ilahi), kanal sadece titreşir. */
     static final String CHANNEL = "vakit_v2";
     /** Yedek kanal: ses servisi başlatılamazsa telefonun alarm sesiyle bildirim. */
-    static final String CHANNEL_FALLBACK = "vakit_yedek";
+    static final String CHANNEL_FALLBACK = "vakit_yedek_v2";
 
     static int notificationId(int prayer) {
         return 100 + prayer;
@@ -27,24 +27,23 @@ public final class Notifier {
     public static void ensureChannel(Context c) {
         NotificationManager nm = c.getSystemService(NotificationManager.class);
         nm.deleteNotificationChannel("vakit_alarmi"); // ilk sürümün kanalı
+        nm.deleteNotificationChannel("vakit_yedek");  // sessiz modu dinlemeyen eski yedek kanal
         if (nm.getNotificationChannel(CHANNEL) == null) {
             NotificationChannel ch = new NotificationChannel(CHANNEL, "Namaz vakti alarmı",
                     NotificationManager.IMPORTANCE_HIGH);
-            ch.setDescription("Namaz vakti girdiğinde gösterilen uyarı (sesi uygulama ayarlarından seçilir)");
+            ch.setDescription("Namaz vakti girdiğinde gösterilen uyarı (sesi uygulama ayarlarından seçilir; telefon sessizdeyken çalmaz)");
             ch.setSound(null, null);
             ch.enableVibration(true);
             ch.setVibrationPattern(new long[]{0, 700, 400, 700, 400, 700});
             ch.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            ch.setBypassDnd(true);
             nm.createNotificationChannel(ch);
         }
         if (nm.getNotificationChannel(CHANNEL_FALLBACK) == null) {
             NotificationChannel ch = new NotificationChannel(CHANNEL_FALLBACK, "Namaz vakti (yedek)",
                     NotificationManager.IMPORTANCE_HIGH);
-            Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            if (sound == null) sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            Uri sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             ch.setSound(sound, new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .build());
             ch.enableVibration(true);

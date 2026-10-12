@@ -32,6 +32,8 @@ import java.io.OutputStream;
 public class SettingsActivity extends Activity {
 
     private static final int REQ_SOUND_FILE = 7;
+    private static final String SILENT_MSG =
+            "Telefon sessizde ya da titreşimde; alarm sesi çalmaz. Ses tuşuyla zil sesini açıp tekrar deneyin.";
 
     private TextView sourceText, soundText;
     private LinearLayout warnBox;
@@ -221,6 +223,8 @@ public class SettingsActivity extends Activity {
         listen.setOnClickListener(v -> {
             if (Prefs.sound(this) == Prefs.SES_TITRESIM) {
                 Toast.makeText(this, "Sadece titreşim seçili; ses çalınmaz.", Toast.LENGTH_SHORT).show();
+            } else if (!AlarmSoundService.ringerAllowsSound(this)) {
+                Toast.makeText(this, SILENT_MSG, Toast.LENGTH_LONG).show();
             } else {
                 Notifier.preview(this, AlarmScheduler.currentPrayer(this, System.currentTimeMillis()));
             }
@@ -302,8 +306,11 @@ public class SettingsActivity extends Activity {
         Button now = Ui.add(sheet.body, Ui.button(this, "Şimdi çal", R.style.Btn_Primary_Sheet), R.dimen.gap_block);
         now.setOnClickListener(v -> {
             sheet.dialog.dismiss();
+            if (!AlarmSoundService.ringerAllowsSound(this)) {
+                Toast.makeText(this, SILENT_MSG, Toast.LENGTH_LONG).show();
+            }
             Notifier.preview(this, AlarmScheduler.currentPrayer(this, System.currentTimeMillis()));
-            Toast.makeText(this, "Durdurmak için bildirimdeki “Sesi durdur”a basın.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Durdurmak için bir ses tuşuna ya da bildirimdeki “Sesi durdur”a basın.", Toast.LENGTH_LONG).show();
         });
         Button later = Ui.add(sheet.body, Ui.button(this, "1 dakika sonra çal", R.style.Btn_Secondary_Sheet), R.dimen.gap_row);
         later.setOnClickListener(v -> {
